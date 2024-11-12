@@ -14,4 +14,4 @@
 
 ## Project Overview
 
-This project aims to develop, train, and deploy a Large Language Model (LLM) from scratch. This involves creating a natural language processing (NLP) model capable of understanding and generating human-like text based on a diverse corpus of data. The project follows a comprehensive pipeline, covering model development, testing, training, evaluation, and production
+This project aims to develop, train, and deploy a Large Language Model (LLM) from scratch. This involves creating a natural language processing (NLP) model capable of understanding and generating human-like text based on a diverse corpus of data. The project follows a comprehensive pipeline, covering model development, testing, training, evaluation, and production.
