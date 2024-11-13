@@ -1,5 +1,17 @@
 {
     "cSpell.words": [
         "yamls"
+    ],
+    "python.testing.unittestArgs": [
+        "-v",
+        "-s",
+        "./crawl_llm",
+        "-p",
+        "test*.py"
+    ],
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestArgs": [
+        "-s"
     ]
 }
