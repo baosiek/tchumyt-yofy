@@ -12,6 +12,7 @@ structure:
     - cao # stands for Configuration Access Objects
     - constants
     - architecture
+    - exceptions
 
   test:
     - components
@@ -21,6 +22,7 @@ structure:
     - constants
     - architecture
     - utils
+    - exceptions
 
   # These directories are not part of source and test
   others:
