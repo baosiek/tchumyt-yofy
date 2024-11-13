@@ -4,7 +4,7 @@ logger = logging.getLogger("Testing")
 
 
 class TchumytException(Exception):
-    def __init__(self, error_message: str = "TchumytError was raised"):
+    def __init__(self, error_message: str = "TchumytError was raised."):
         self.error_message = error_message
         super().__init__(self.error_message)
         print(self.error_message)
