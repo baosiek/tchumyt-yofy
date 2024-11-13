@@ -17,6 +17,20 @@
 This project aims to develop, train, and deploy a Large Language Model (LLM) from scratch. This involves creating a natural language processing (NLP) model capable of understanding and generating human-like text based on a diverse corpus of data. The project follows a comprehensive pipeline, covering model development, testing, training, evaluation, and production.
 
 ## Project Structure
+
+In order to create the structure the project must be initialized with poetry.
+
+```bash
+   poetry new crawl_llm
+   ```
+
+Then execute:
+```bash
+   python project-structure.py crawl_llm
+   ```
+
+The below structure is created:
+
 ├── README.md              # Project documentation and overview </br>
 ├── crawl_llm/ </br>
 │   ├── __init__.py        # Allows the directory to be treated as a package with poetry </br>
