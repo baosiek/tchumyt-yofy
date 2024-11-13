@@ -10,7 +10,7 @@ class TchumytException(Exception):
         print(self.error_message)
 
 
-def run_exception_tchumyt_exception(mode: str):
+def run_tchumyt_exception(mode: str):
     message: str = f"{mode} is a message"
 
     if not message[0].isupper():
