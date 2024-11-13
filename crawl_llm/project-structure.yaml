@@ -1,0 +1,33 @@
+# This file contains the structure of this project
+# It assumes that this project was initialize with poetry,
+# where the name of the root directory is equal to the name
+# of the source directory. In this scenario the test directory
+# is also under the root directory.
+
+structure:
+  src:
+    - components
+    - config
+    - pipelines
+    - cao # stands for Configuration Access Objects
+    - constants
+    - architecture
+
+  test:
+    - components
+    - config
+    - pipelines
+    - cao # stands for Configuration Access Objects
+    - constants
+    - architecture
+    - utils
+
+  # These directories are not part of source and test
+  others:
+    - logs
+    - yamls
+    - utils
+    - notebooks
+    - models
+    - reports
+     
