@@ -18,30 +18,30 @@ This project aims to develop, train, and deploy a Large Language Model (LLM) fro
 
 ## Project Structure
 ├── README.md              # Project documentation and overview </br>
-├── crawl_llm/
-│   ├── __init__.py        # Allows the directory to be treated as a package with poetry
-│   ├── crawl_llm/
-│   |   ├── __init__.py 
-│   |   ├── architecture/  # Folder containing the model architecture
-│   |   ├── cao/           # Folder components configuration access objects
-│   |   ├── components/    # Folder containing components definitions
-│   |   ├── config/        # Folder containing the model configurations
-│   |   ├── constants/     # Folder containing general constants
-│   |   ├── pipelines/     # Folder containing the pipelines
-│   ├── logs/              # Folder containing all logs
-│   ├── models/            # Folder containing trained models
-│   ├── notebooks/         # Folder containing notebooks for experimentation
-│   ├── reports/           # Folder containing reports of this project
-│   ├── tests              # Test folder
-│   |   ├── __init__.py 
-│   |   ├── architecture/  # Folder containing the model architecture
-│   |   ├── cao/           # Folder components configuration access objects
-│   |   ├── components/    # Folder containing components definitions
-│   |   ├── config/        # Folder containing the model configurations
-│   |   ├── constants/     # Folder containing general constants
-│   |   └── pipelines/     # Folder containing the pipelines
-|   ├── utils/             # Helper functions for general utilities   
-├── yamls/                 # Folder containing configuration yaml files
-├── .gitignore
-└── LICENSE                # Project's LICENSE
+├── crawl_llm/ </br>
+│   ├── __init__.py        # Allows the directory to be treated as a package with poetry </br>
+│   ├── crawl_llm/ </br>
+│   |   ├── __init__.py </br>
+│   |   ├── architecture/  # Folder containing the model architecture </br>
+│   |   ├── cao/           # Folder components configuration access objects </br>
+│   |   ├── components/    # Folder containing components definitions </br>
+│   |   ├── config/        # Folder containing the model configurations </br>
+│   |   ├── constants/     # Folder containing general constants </br>
+│   |   ├── pipelines/     # Folder containing the pipelines </br>
+│   ├── logs/              # Folder containing all logs </br>
+│   ├── models/            # Folder containing trained models </br>
+│   ├── notebooks/         # Folder containing notebooks for experimentation </br>
+│   ├── reports/           # Folder containing reports of this project </br>
+│   ├── tests              # Test folder </br>
+│   |   ├── __init__.py </br>
+│   |   ├── architecture/  # Folder containing the model architecture </br>
+│   |   ├── cao/           # Folder components configuration access objects </br>
+│   |   ├── components/    # Folder containing components definitions </br>
+│   |   ├── config/        # Folder containing the model configurations </br>
+│   |   ├── constants/     # Folder containing general constants </br>
+│   |   └── pipelines/     # Folder containing the pipelines </br>
+|   ├── utils/             # Helper functions for general utilities </br>
+├── yamls/                 # Folder containing configuration yaml files </br>
+├── .gitignore </br>
+└── LICENSE                # Project's LICENSE </br>
 
