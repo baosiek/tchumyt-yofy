@@ -27,6 +27,7 @@ This project aims to develop, train, and deploy a Large Language Model (LLM) fro
 │   |   ├── components/    # Folder containing components definitions </br>
 │   |   ├── config/        # Folder containing the model configurations </br>
 │   |   ├── constants/     # Folder containing general constants </br>
+│   |   ├── exceptions/    # Folder containing custom exceptions </br>
 │   |   ├── pipelines/     # Folder containing the pipelines </br>
 │   ├── logs/              # Folder containing all logs </br>
 │   ├── models/            # Folder containing trained models </br>
@@ -39,6 +40,7 @@ This project aims to develop, train, and deploy a Large Language Model (LLM) fro
 │   |   ├── components/    # Folder containing components definitions </br>
 │   |   ├── config/        # Folder containing the model configurations </br>
 │   |   ├── constants/     # Folder containing general constants </br>
+│   |   ├── exceptions/    # Folder containing custom exceptions </br>
 │   |   └── pipelines/     # Folder containing the pipelines </br>
 |   ├── utils/             # Helper functions for general utilities </br>
 ├── yamls/                 # Folder containing configuration yaml files </br>
