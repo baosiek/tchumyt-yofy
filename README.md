@@ -31,33 +31,35 @@ Then execute:
 
 The below structure is created:
 
-├── README.md              # Project documentation and overview </br>
+├── README.md                 # Project documentation and overview </br>
 ├── crawl_llm/ </br>
-│   ├── __init__.py        # Allows the directory to be treated as a package with poetry </br>
+│   ├── __init__.py           # Allows the directory to be treated as a package with poetry </br>
 │   ├── crawl_llm/ </br>
 │   |   ├── __init__.py </br>
-│   |   ├── architecture/  # Folder containing the model architecture </br>
-│   |   ├── cao/           # Folder components configuration access objects </br>
-│   |   ├── components/    # Folder containing components definitions </br>
-│   |   ├── config/        # Folder containing the model configurations </br>
-│   |   ├── constants/     # Folder containing general constants </br>
-│   |   ├── exceptions/    # Folder containing custom exceptions </br>
-│   |   ├── pipelines/     # Folder containing the pipelines </br>
-│   ├── logs/              # Folder containing all logs </br>
-│   ├── models/            # Folder containing trained models </br>
-│   ├── notebooks/         # Folder containing notebooks for experimentation </br>
-│   ├── reports/           # Folder containing reports of this project </br>
-│   ├── tests              # Test folder </br>
+│   |   ├── architecture/        # Folder containing the model architecture </br>
+│   |   ├── cao/                 # Folder components configuration access objects </br>
+│   |   ├── components/          # Folder containing components definitions </br>
+│   |   ├── config/              # Folder containing the model configurations </br>
+│   |   ├── constants/           # Folder containing general constants </br>
+│   |   ├── exceptions/          # Folder containing custom exceptions </br>
+│   |   ├── pipelines/           # Folder containing the pipelines </br>
+│   |   |   ├── data_ingestion/  # Folder containing the data_ingestion pipeline </br>
+│   ├── logs/                    # Folder containing all logs </br>
+│   ├── models/                  # Folder containing trained models </br>
+│   ├── notebooks/               # Folder containing notebooks for experimentation </br>
+│   ├── reports/                 # Folder containing reports of this project </br>
+│   ├── tests                    # Test folder </br>
 │   |   ├── __init__.py </br>
-│   |   ├── architecture/  # Folder containing the model architecture </br>
-│   |   ├── cao/           # Folder components configuration access objects </br>
-│   |   ├── components/    # Folder containing components definitions </br>
-│   |   ├── config/        # Folder containing the model configurations </br>
-│   |   ├── constants/     # Folder containing general constants </br>
-│   |   ├── exceptions/    # Folder containing custom exceptions </br>
-│   |   └── pipelines/     # Folder containing the pipelines </br>
-|   ├── utils/             # Helper functions for general utilities </br>
-├── yamls/                 # Folder containing configuration yaml files </br>
+│   |   ├── architecture/        # Folder containing the model architecture </br>
+│   |   ├── cao/                 # Folder components configuration access objects </br>
+│   |   ├── components/          # Folder containing components definitions </br>
+│   |   ├── config/              # Folder containing the model configurations </br>
+│   |   ├── constants/           # Folder containing general constants </br>
+│   |   ├── exceptions/          # Folder containing custom exceptions </br>
+│   |   ├── pipelines/           # Folder containing the pipelines </br>
+│   |   |   ├── data_ingestion/  # Folder containing the data_ingestion pipeline </br>
+|   ├── utils/                   # Helper functions for general utilities </br>
+├── yamls/                       # Folder containing configuration yaml files </br>
 ├── .gitignore </br>
-└── LICENSE                # Project's LICENSE </br>
+└── LICENSE                      # Project's LICENSE </br>
 
