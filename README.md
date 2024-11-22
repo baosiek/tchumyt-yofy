@@ -21,7 +21,7 @@ This project aims to develop, train, and deploy a Large Language Model (LLM) fro
 In order to create the structure the project must be initialized with poetry.
 
 ```bash
-   poetry new crawl_llm
+   poetry new llm
    ```
 
 Then execute:
@@ -32,9 +32,9 @@ Then execute:
 The below structure is created:
 
 ├── README.md                 # Project documentation and overview </br>
-├── crawl_llm/ </br>
+├── llm/ </br>
 │   ├── __init__.py           # Allows the directory to be treated as a package with poetry </br>
-│   ├── crawl_llm/ </br>
+│   ├── llm/ </br>
 │   |   ├── __init__.py </br>
 │   |   ├── architecture/        # Folder containing the model architecture </br>
 │   |   ├── cao/                 # Folder components configuration access objects </br>
