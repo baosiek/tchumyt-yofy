@@ -1,6 +1,6 @@
 import pytest
 
-from crawl_llm.crawl_llm.exceptions.custom_exceptions  \
+from llm.llm.exceptions.custom_exceptions  \
     import TchumytException
 
 
