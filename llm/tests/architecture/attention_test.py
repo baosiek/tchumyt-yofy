@@ -3,7 +3,7 @@ import torch
 from llm.llm.architecture.attention import Attention
 
 
-def test_attention_computation():
+def test_attention_without_passing_qkv():
 
     torch.manual_seed(123)
 

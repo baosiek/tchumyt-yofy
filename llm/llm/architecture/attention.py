@@ -10,7 +10,7 @@ class Attention(nn.Module):
     The forward method computes the scaled dot-product (the attention)
     between a query and a key
 
-    Args: x
+    Args:
         embedding_dimension: torch.Tensor -> the embedding dimension
         of the tokens.
         dropout: float -> the dropout rate. A number between [0, 1].
@@ -19,24 +19,28 @@ class Attention(nn.Module):
     '''
 
     def __init__(self,
-                 embedding_dimension: int,
+                 embedding_dimension: int = 0,
                  dropout: float = 0.5,
                  qvk_bias: bool = False,
                  mask: bool = False):
         super().__init__()
 
-        # Initializes the input layer.
+        # Initializes the query layer.
         self.query: nn.Linear = nn.Linear(
             embedding_dimension,
             embedding_dimension,
             bias=qvk_bias
         )
-        self.key = nn.Linear(
+
+        # Initializes the key layer.
+        self.key: nn.Linear = nn.Linear(
             embedding_dimension,
             embedding_dimension,
             bias=qvk_bias
         )
-        self.value = nn.Linear(
+
+        # Initializes the value layer.
+        self.value: nn.Linear = nn.Linear(
             embedding_dimension,
             embedding_dimension,
             bias=qvk_bias
