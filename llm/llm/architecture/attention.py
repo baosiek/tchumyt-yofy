@@ -6,47 +6,96 @@ class Attention(nn.Module):
     '''
     This class implements the self-attention mechanism as described in
     https://proceedings.neurips.cc/paper_files/paper/2017/file/3f5ee243547dee91fbd053c1c4a845aa-Paper.pdf
+
+    The forward method computes the scaled dot-product (the attention)
+    between a query and a key
+
+    Args: x
+        embedding_dimension: torch.Tensor -> the embedding dimension
+        of the tokens.
+        dropout: float -> the dropout rate. A number between [0, 1].
+        qvk_bias: bool -> if to use the bias in the linear layers.
+        mask: bool -> if the forward mask must be applied.
     '''
 
-    def __init__(self, d_in: int,
-                 d_out, dropout: float = 0.5,
+    def __init__(self,
+                 embedding_dimension: int,
+                 dropout: float = 0.5,
                  qvk_bias: bool = False,
-                 mask: torch.Tensor = None):
+                 mask: bool = False):
         super().__init__()
 
         # Initializes the input layer.
-        self.query = nn.Linear(d_in, d_out, bias=qvk_bias)
-        self.key = nn.Linear(d_in, d_out, bias=qvk_bias)
-        self.value = nn.Linear(d_in, d_out, bias=qvk_bias)
+        self.query: nn.Linear = nn.Linear(
+            embedding_dimension,
+            embedding_dimension,
+            bias=qvk_bias
+        )
+        self.key = nn.Linear(
+            embedding_dimension,
+            embedding_dimension,
+            bias=qvk_bias
+        )
+        self.value = nn.Linear(
+            embedding_dimension,
+            embedding_dimension,
+            bias=qvk_bias
+        )
 
         # Initializes the dropout layer
         self.dropout: nn.Dropout = nn.Dropout(p=dropout)
 
-        # Initializes the mask layer
-        self.mask: torch.Tensor = mask
+        # Initializes mask
+        self.mask: bool = mask
 
-        # Register mask in the buffer to enable allocation into
-        # the appropriate device together with the model    
-        if mask is not None:
-            self.register_buffer("mask", mask)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        The forward method computes the scaled dot-product (the attention)
+        between a query and a key
 
-    def forward(self, x: torch.Tensor):
+        Args: x
+            x: torch.Tensor -> contains the input sequence
+
+        Returns: context
+            - context: torch.Tensor -> tensor containing the context vector
+            from attention mechanism.
+        """
+
+        # Number of tokens in the input
+        sequence_length: int = x.shape[1]
 
         #  Updates attention weights with the input
         queries: torch.Tensor = self.query(x)
         keys: torch.Tensor = self.key(x)
         values: torch.Tensor = self.value(x)
 
-        #  Computes the attention weights
-        attention_weights = torch.softmax(
-            torch.matmul(queries, keys.T) /
-            torch.sqrt(torch.tensor(keys.shape[-1])), dim=-1
+        #  Computes the attention scores
+        attention_weights: torch.Tensor = torch.matmul(
+            queries,
+            keys.transpose(1, 2)
         )
 
-        if self.mask is not None:
-            attention_weights += (self.mask * -torch.inf)
+        if self.mask:
+            attention_weights.masked_fill_(
+                torch.triu(
+                    torch.ones(
+                        sequence_length,
+                        sequence_length),
+                    diagonal=1).bool(),
+                -torch.inf)
 
-        # Applies the dropout layer
+        # Effectively computes the attention weights
+        attention_weights = torch.softmax(
+            attention_weights /
+            torch.sqrt(
+                torch.tensor(
+                    keys.shape[2]
+                )
+            ),
+            dim=2
+        )
+
+        # Applies dropout
         attention_weights = self.dropout(attention_weights)
 
         # Returns the context vector

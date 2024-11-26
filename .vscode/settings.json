@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "triu",
         "yamls"
     ],
     "python.testing.unittestArgs": [
