@@ -1,6 +1,7 @@
 import json
 import logging
 import logging.config
+import os
 import yaml
 
 '''
@@ -16,5 +17,21 @@ logging.config.dictConfig(config)
 logger = logging.getLogger("crawl_model")
 
 # loads and model configuration
-with open("llm/configs/gpt_config_124m.yaml") as f:
+test_config: str = "llm/configs/gpt_config_124m_test.yaml"
+prod_config: str = "llm/configs/gpt_config_124m.yaml"
+file_path: str = ""
+
+if os.path.exists(test_config):
+    file_path = test_config
+elif os.path.exists(prod_config):
+    file_path = prod_config
+else:
+    raise FileExistsError(
+        f'''
+        Could not find neither {test_config} nor {prod_config}
+        '''.strip()
+    )
+
+logger.info(f"Configuration file: {file_path}")
+with open(file_path) as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)

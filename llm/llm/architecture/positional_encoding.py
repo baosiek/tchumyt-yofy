@@ -14,7 +14,7 @@ class PositionalEncoding(nn.Module):
             dropout: Dropout rate for regularization.
         """
         super(PositionalEncoding, self).__init__()
-        self.dropout = nn.Dropout(p=dropout)
+        self.dropout = nn.Dropout(dropout)
 
         # Create a matrix of [max_len, d_model] with positional encodings
         pe = torch.zeros(max_len, embedding_dim)
