@@ -4,12 +4,12 @@ import math
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_len=5000, dropout=0.1):
+    def __init__(self, embedding_dim, max_len=5000, dropout=0.1):
         """
         Initializes the Positional Encoding module.
 
         Args:
-            d_model: The dimension of the model (size of embeddings).
+            embedding_dim: The dimension of the model (size of embeddings).
             max_len: The maximum sequence length.
             dropout: Dropout rate for regularization.
         """
@@ -17,11 +17,11 @@ class PositionalEncoding(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
 
         # Create a matrix of [max_len, d_model] with positional encodings
-        pe = torch.zeros(max_len, d_model)
+        pe = torch.zeros(max_len, embedding_dim)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
-            torch.arange(0, d_model, 2).float() *
-            -(math.log(10000.0) / d_model)
+            torch.arange(0, embedding_dim, 2).float() *
+            -(math.log(10000.0) / embedding_dim)
             )
 
         # Apply sin to even indices
@@ -32,7 +32,7 @@ class PositionalEncoding(nn.Module):
         pe = pe.unsqueeze(0)  # Add batch dimension
         self.register_buffer('pe', pe)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor):
         """
         Forward pass for applying positional encoding.
 

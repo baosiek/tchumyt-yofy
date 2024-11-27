@@ -11,12 +11,12 @@ class FeedForward(nn.Module):
         embedding_dimension: int = cfg.get('model').get('embedding_dimension')
         self.layers: nn.Sequential = nn.Sequential(
             nn.Linear(
-                embedding_dimension, 
+                embedding_dimension,
                 4 * embedding_dimension
             ),
             nn.GELU(),
             nn.Linear(
-                4 * embedding_dimension, 
+                4 * embedding_dimension,
                 embedding_dimension
             )
         )
