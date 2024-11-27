@@ -1,12 +1,20 @@
 import torch
 import torch.nn as nn
 
+from typing import Any, Dict
+
 from llm.llm.architecture.positional_encoding import PositionalEncoding
 from llm.llm.architecture.transformer_block import TransformerBlock
 
 
 class GPTModel(nn.Module):
-    def __init__(self, cfg):
+    def __init__(self, cfg: Dict[str, Any]):
+        """
+        Initializes the GPTModel module.
+
+        Args:
+            cfg: Dict[str, Any] -> The dictionary with the configuration file.
+        """
         super(GPTModel, self).__init__()
 
         # The model's layers
@@ -20,11 +28,6 @@ class GPTModel(nn.Module):
         self.positional_embedding: PositionalEncoding = PositionalEncoding(
             embedding_dim=cfg['embedding_dimension'],
             dropout=cfg['drop_rate']
-        )
-
-        # The dropout layer
-        self.dropout: nn.Dropout = nn.Dropout(
-            cfg['drop_rate']
         )
 
         # The transformer block layer
@@ -47,15 +50,20 @@ class GPTModel(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+            Forward pass for applying GPTModel.
 
-        # Token embedding
-        token_embedding: torch.Tensor = self.token_embedding(x)
+            Args:
+                x: torch.Tensor -> The input tensor of shape
+                (batch_size, seq_len, d_model).
 
-        # Positinal encoding
-        positional_encoding: torch.Tensor = self.positional_embedding(x)
+            Returns:
+                torch.Tensor of same shape as x with token embedding and
+                positional encoding added
+        """
 
-        x = token_embedding + positional_encoding
-        x = self.dropout(x)
+        x = self.token_embedding(x)
+        x = self.positional_embedding(x)
         x = self.transformer_blocks(x)
         x = self.norm_layer(x)
         return self.output(x)

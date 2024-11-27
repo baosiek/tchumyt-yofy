@@ -1,13 +1,19 @@
 import torch
 import torch.nn as nn
 
-from typing import Dict
+from typing import Dict, Any
 
 from llm.llm.architecture.feed_forward import FeedForward
 
 
 class TransformerBlock(nn.Module):
-    def __init__(self, cfg: Dict):
+    def __init__(self, cfg: Dict[str, Any]):
+        """
+        Initializes the Transformer Block module.
+
+        Args:
+            cfg: Dict[str, Any] -> The dictionary with the configuration file.
+        """
         super(TransformerBlock, self).__init__()
 
         # Initializes the Multihead attention layer
@@ -30,12 +36,23 @@ class TransformerBlock(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
 
+        """
+        Forward pass for applying transformer block.
+
+        Args:
+            x: torch.Tensor -> The input tensor of shape
+            (batch_size, seq_len, d_model).
+
+        Returns:
+            torch.Tensor of same shape as x with attention added
+        """
+
         # Store the input value
         shortcut: torch.Tensor = x
 
         # Applies the transformer block flow
         x = self.norm1(x)
-        x = self.attention(x)
+        x, _ = self.attention(x, x, x)
         x = self.drop_shortcut(x)
         x = x + shortcut
 
