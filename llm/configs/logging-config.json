@@ -23,14 +23,14 @@
         },
         "template_handler": {
             "class": "logging.FileHandler",
-            "filename": "logs/template.log",
+            "filename": "llm/logs/template.log",
             "formatter": "detailed",
             "level": "INFO",
             "mode": "w"
         },
         "project_handler": {
             "class": "logging.FileHandler",
-            "filename": "logs/project.log",
+            "filename": "llm/logs/project.log",
             "formatter": "detailed",
             "level": "INFO",
             "mode": "w"
