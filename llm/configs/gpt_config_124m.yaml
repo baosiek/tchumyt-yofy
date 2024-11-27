@@ -1,0 +1,8 @@
+name: GPT_124M
+vocabulary_size: 50257
+sequence_length: 1024
+embedding_dimension: 768
+number_heads: 12
+number_layers: 12
+drop_rate: 0.1
+bias: False
