@@ -3,7 +3,7 @@
     "disable_existing_loggers": "False",
     "formatters": {
         "standard": {
-            "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            "format": "%(asctime)s - %(module)s - %(levelname)s - %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S"
         },
         "detailed": {
@@ -18,8 +18,8 @@
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
-            "level": "INFO"
+            "formatter": "standard",
+            "level": "DEBUG"
         },
         "template_handler": {
             "class": "logging.FileHandler",
@@ -44,8 +44,8 @@
         },
         "crawl_model": {
             "handlers": ["console", "project_handler"],
-            "level": "DEBUG",
-            "propagate": "False"
+            "level": "INFO",
+            "propagate": "True"
         }
     }
 }
