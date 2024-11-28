@@ -8,10 +8,10 @@ from llm.llm.architecture.gpt_model import GPTModel
 @pytest.fixture
 def get_batch() -> torch.Tensor:
 
-    sentence = [3, 5, 2, 0, 1, 6]
+    sentence = [3, 5, 2, 0, 1, 6, 4]
     sentence_tensor = torch.tensor(sentence, dtype=torch.long)
 
-    batch_size: int = 3
+    batch_size: int = 5
 
     # Temporary structure to enable torch.stack
     input_list = []
