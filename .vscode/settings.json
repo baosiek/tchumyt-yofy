@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "bson",
         "GELU",
         "tril",
         "triu",
@@ -17,5 +18,6 @@
     "python.testing.pytestArgs": [
         "-s",
         "-v"
-    ]
+    ],
+    "python.envFile": "${workspaceFolder}/variables.env"
 }
