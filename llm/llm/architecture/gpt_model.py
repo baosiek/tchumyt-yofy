@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from typing import Any, Dict
 
+from llm.llm import logger
 from llm.llm.architecture.positional_encoding import PositionalEncoding
 from llm.llm.architecture.transformer_block import TransformerBlock
 
@@ -62,8 +63,13 @@ class GPTModel(nn.Module):
                 positional encoding added
         """
 
+        logger.debug(f"x input shape: {x.shape}")
         x = self.token_embedding(x)
+        logger.debug(f"x after token embedding: {x.shape}")
         x = self.positional_embedding(x)
+        logger.debug(f"x after positional embedding: {x.shape}")
         x = self.transformer_blocks(x)
+        logger.debug(f"x after attention: {x.shape}")
         x = self.norm_layer(x)
+        logger.debug(f"x after normalization layer: {x.shape}")
         return self.output(x)
