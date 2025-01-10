@@ -2,6 +2,7 @@
     "cSpell.words": [
         "bson",
         "GELU",
+        "pydantic",
         "tril",
         "triu",
         "yamls"
