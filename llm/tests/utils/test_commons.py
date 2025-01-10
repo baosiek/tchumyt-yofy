@@ -1,6 +1,6 @@
 import pytest
 
-from llm.utils.commons import read_yaml
+from llm.llm.utils.commons import read_yaml
 from llm.llm.exceptions.custom_exceptions import EmptyFileError
 
 

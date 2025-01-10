@@ -3,13 +3,13 @@ import pytest
 from typing import Any, Dict
 from bson.objectid import ObjectId
 
-from llm.utils.tchumyt_mongo_client import TchumytMongoClient
+from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 
 
 @pytest.fixture
 def pathname() -> str:
-    return "llm/configs/dataset_config.yaml"
+    return "llm/configs/dataset_loader_config.yaml"
 
 
 @pytest.fixture
