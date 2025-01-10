@@ -4,7 +4,7 @@ from typing import Dict, Any
 from torch.utils.data import DataLoader
 from bson.objectid import ObjectId
 
-from llm.utils.tchumyt_mongo_client import TchumytMongoClient
+from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.data_loader import \
      create_crawl_dataset_loader
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
@@ -12,7 +12,7 @@ from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 
 @pytest.fixture
 def pathname() -> str:
-    return "llm/configs/dataset_config.yaml"
+    return "llm/configs/dataset_loader_config.yaml"
 
 
 @pytest.fixture

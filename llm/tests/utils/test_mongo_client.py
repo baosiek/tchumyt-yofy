@@ -1,14 +1,14 @@
 import pytest
 
 from bson.objectid import ObjectId
-from utils.tchumyt_mongo_client import TchumytMongoClient
+from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from pymongo.cursor import Cursor
 from typing import Any, Dict, List
 
 
 @pytest.fixture
 def pathname() -> str:
-    return "llm/configs/dataset_config.yaml"
+    return "llm/configs/dataset_loader_config.yaml"
 
 
 @pytest.fixture
@@ -18,7 +18,7 @@ def query() -> Dict[str, Any]:
 
 def test_client_init_function(pathname: str):
     client: TchumytMongoClient = TchumytMongoClient(pathname)
-    client.configuration['database'] == "crawl_dataset"
+    client.database == "crawl_dataset"
 
 
 def test_query_function_one(pathname: str, query: Dict[str, Any]):
