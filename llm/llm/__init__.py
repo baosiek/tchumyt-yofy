@@ -1,19 +1,28 @@
-import json
+# import json
 import logging
 import logging.config
 import os
+import json
+import yaml
 
-from llm.llm.utils.commons import read_yaml
-from llm import logger
+# from typing import Dict, Any
+
+# from llm.llm.utils.commons import read_yaml
 
 '''
 This module configures the log for the entire package
 '''
 
 # loads and configure logging
+# log_config: Dict[str, Any] = read_json('llm/configs/logging-config.json')
+# logging.config.dictConfig(log_config)
+
+# gets this module logger
+
 with open('llm/configs/logging-config.json', 'r') as f:
     config = json.load(f)
     logging.config.dictConfig(config)
+    logger = logging.getLogger("crawl_model")
 
 # loads and model configuration
 test_config: str = "llm/configs/gpt_config_124m_test.yaml"
@@ -40,4 +49,5 @@ else:
 logger.info(f"Configuration file: {file_path}")
 
 # GPTModel configuration
-cfg = read_yaml(file_path)
+with open(file_path, 'r') as file:
+    cfg = yaml.safe_load(file_path)

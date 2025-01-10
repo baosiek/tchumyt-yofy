@@ -5,7 +5,7 @@ from typing import Any, Dict
 from pymongo.cursor import Cursor
 
 from llm.llm.utils.commons import read_yaml
-from llm import logger
+from llm.llm import logger
 
 
 class TchumytMongoClient():
