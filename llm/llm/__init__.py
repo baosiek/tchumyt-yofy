@@ -23,11 +23,10 @@ file_path: str = ""
 
 """
 Priority for test configuration.
-In case it is found, loads it. Otherwise tries to 
-load the regular one. If not found either, then
+In case it is found, loads it. Otherwise tries to
+load the production one. If not found either, then
 raises file not found exception.
 """
-
 if os.path.exists(test_config):
     file_path = test_config
 elif os.path.exists(prod_config):
@@ -40,5 +39,7 @@ else:
     )
 
 logger.info(f"Configuration file: {file_path}")
+
+
 with open(file_path) as f:
     cfg = yaml.load(f, Loader=yaml.FullLoader)
