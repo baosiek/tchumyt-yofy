@@ -1,4 +1,4 @@
-from llm import logger
+from llm.llm import logger
 
 
 class TchumytException(Exception):
