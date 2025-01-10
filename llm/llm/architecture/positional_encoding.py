@@ -27,7 +27,7 @@ class PositionalEncoding(nn.Module):
         # Apply sin to even indices
         pe[:, 0::2] = torch.sin(position * div_term)
         # Apply cos to odd indices
-        pe[:, 1::2] = torch.cos(position * div_term)  
+        pe[:, 1::2] = torch.cos(position * div_term)
 
         pe = pe.unsqueeze(0)  # Add batch dimension
         self.register_buffer('pe', pe)
