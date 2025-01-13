@@ -5,7 +5,7 @@ import os
 import json
 import yaml
 
-# from typing import Dict, Any
+from typing import Dict, Any
 
 # from llm.llm.utils.commons import read_yaml
 
@@ -48,6 +48,12 @@ else:
 
 logger.info(f"Configuration file: {file_path}")
 
+cfg: Dict[str, Any] = None
+
 # GPTModel configuration
-with open(file_path, 'r') as file:
-    cfg = yaml.safe_load(file_path)
+try:
+    with open(file_path, 'r') as file:
+        cfg = yaml.safe_load(file)
+except FileNotFoundError as error:
+    logger.error(f"File [{file_path}] not found")
+    raise error
