@@ -2,7 +2,9 @@
     "cSpell.words": [
         "bson",
         "GELU",
+        "inferencing",
         "pydantic",
+        "tiktoken",
         "tril",
         "triu",
         "yamls"
