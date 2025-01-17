@@ -42,9 +42,9 @@
             "level": "INFO",
             "propagate": "False"
         },
-        "crawl_model": {
+        "gpt_model": {
             "handlers": ["console", "project_handler"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": "True"
         }
     }

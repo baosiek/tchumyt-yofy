@@ -1,7 +1,9 @@
 {
     "cSpell.words": [
         "bson",
+        "endoftext",
         "GELU",
+        "inferencer",
         "inferencing",
         "pydantic",
         "tiktoken",

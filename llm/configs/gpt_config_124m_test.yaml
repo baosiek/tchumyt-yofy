@@ -7,3 +7,4 @@ number_layers: 12
 drop_rate: 0.1
 attention_mask: False
 bias: False
+tiktoken_encoding: "gpt2"
