@@ -3,7 +3,12 @@ import torch
 from llm.llm.architecture.gpt_model import GPTModel
 
 
-def generate_text(model: GPTModel, idx: torch.Tensor, max_new_tokens: int, context_size: int):
+def generate_text(
+        model: GPTModel,
+        idx: torch.Tensor,
+        max_new_tokens: int,
+        context_size: int
+        ):
 
     for _ in range(max_new_tokens):
         idx_cond: torch.Tensor = idx[:, -context_size:]
@@ -12,7 +17,10 @@ def generate_text(model: GPTModel, idx: torch.Tensor, max_new_tokens: int, conte
 
         logits = logits[:, -1, :]
         probas = torch.softmax(logits, dim=-1)
-        idx_next = torch.argmax(probas, dim=-1, keepdim=True) # greedy decoding
+
+        # greedy decoding
+        idx_next = torch.argmax(probas, dim=-1, keepdim=True)
+
         idx = torch.cat((idx, idx_next), dim=1)
 
     return idx

@@ -17,10 +17,17 @@ def test_generate_text(text: str):
     encoded = tokenizer.encode(text)
     encoded_tensor = torch.tensor(encoded).unsqueeze(0)
 
+    torch.manual_seed(456)
+
     model: GPTModel = GPTModel(cfg)
 
-    output = generate_text(model=model, idx=encoded_tensor, max_new_tokens=6, context_size=cfg['sequence_length'])
-    logger.info(f"Output: {output}")
-    logger.info(f"Output length: {len(output[0])}")
+    output = generate_text(
+        model=model,
+        idx=encoded_tensor,
+        max_new_tokens=6,
+        context_size=cfg['sequence_length']
+        )
 
+    expected: torch.Tensor = torch.tensor([[15496,    11,   314,   716,  5750,  7632, 49257, 21406, 46441, 21406]])
 
+    assert expected.equal(output)
