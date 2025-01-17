@@ -3,7 +3,7 @@ import tiktoken
 import torch
 
 from llm.llm.architecture.gpt_model import GPTModel
-from llm.llm import logger, cfg
+from llm.llm import cfg
 from llm.llm.pipelines.inferencing.inference import generate_text
 
 
@@ -28,6 +28,8 @@ def test_generate_text(text: str):
         context_size=cfg['sequence_length']
         )
 
-    expected: torch.Tensor = torch.tensor([[15496,    11,   314,   716,  5750,  7632, 49257, 21406, 46441, 21406]])
+    expected: torch.Tensor = torch.tensor([
+        [15496, 11, 314, 716, 5750, 7632, 49257, 21406, 46441, 21406]
+        ])
 
     assert expected.equal(output)

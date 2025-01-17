@@ -22,7 +22,7 @@ This module configures the log for the entire package
 with open('llm/configs/logging-config.json', 'r') as f:
     config = json.load(f)
     logging.config.dictConfig(config)
-    logger = logging.getLogger("crawl_model")
+    logger = logging.getLogger("gpt_model")
 
 # loads and model configuration
 test_config: str = "llm/configs/gpt_config_124m_test.yaml"
