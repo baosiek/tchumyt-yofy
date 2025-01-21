@@ -7,17 +7,10 @@ import yaml
 
 from typing import Dict, Any
 
-# from llm.llm.utils.commons import read_yaml
-
 '''
 This module configures the log for the entire package
 '''
 
-# loads and configure logging
-# log_config: Dict[str, Any] = read_json('llm/configs/logging-config.json')
-# logging.config.dictConfig(log_config)
-
-# gets this module logger
 
 with open('llm/configs/logging-config.json', 'r') as f:
     config = json.load(f)
