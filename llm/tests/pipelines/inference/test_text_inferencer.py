@@ -4,7 +4,7 @@ import torch
 from typing import List, Tuple
 
 from llm.llm import cfg, logger
-from llm.llm.pipelines.inferencing.text_inferencer import TextProvider
+from llm.llm.pipelines.inference.text_inferencer import TextProvider
 
 
 @pytest.fixture()
