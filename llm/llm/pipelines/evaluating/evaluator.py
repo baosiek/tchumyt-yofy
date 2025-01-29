@@ -1,5 +1,7 @@
 import torch
 
+from torch.utils.data import DataLoader
+
 from llm.llm.architecture.gpt_model import GPTModel
 
 
@@ -25,5 +27,28 @@ class Evaluator():
 
         return loss
 
-    def calculate_epoch_loss():
-        pass
+    def calculate_epoch_loss(
+            self,
+            data_loader: DataLoader,
+            num_batches: int = None
+            ):
+        total_loss: float = 0.0
+
+        if len(data_loader) == 0:
+            return float("nan")
+        elif num_batches is None:
+            num_batches = len(data_loader)
+        else:
+            num_batches = min(num_batches, len(data_loader))
+
+        for i, (input_batch, target_batch) in enumerate(data_loader):
+            if i < num_batches:
+                loss: torch.Tensor = self.calculate_batch_loss(
+                    input_batch=input_batch,
+                    target_batch=target_batch
+                    )
+                total_loss += loss.item()
+            else:
+                break
+
+        return total_loss / num_batches
