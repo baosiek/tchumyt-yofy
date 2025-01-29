@@ -1,5 +1,6 @@
 import torch
 
+from typing import Tuple
 from torch.utils.data import DataLoader
 
 from llm.llm.architecture.gpt_model import GPTModel
@@ -31,7 +32,7 @@ class Evaluator():
             self,
             data_loader: DataLoader,
             num_batches: int = None
-            ):
+            ) -> float:
         total_loss: float = 0.0
 
         if len(data_loader) == 0:
@@ -52,3 +53,23 @@ class Evaluator():
                 break
 
         return total_loss / num_batches
+
+    def evaluate_model(self,
+                       train_loader: DataLoader,
+                       validation_loader: DataLoader,
+                       eval_iter: int) -> Tuple[float, float]:
+        self.model.eval()
+
+        with torch.no_grad():
+            train_loss: float = self.calculate_epoch_loss(
+                data_loader=train_loader, num_batches=eval_iter
+            )
+
+            validation_loss: float = self.calculate_epoch_loss(
+                data_loader=validation_loader,
+                num_batches=eval_iter
+            )
+
+        self.model.train()
+
+        return (train_loss, validation_loss)

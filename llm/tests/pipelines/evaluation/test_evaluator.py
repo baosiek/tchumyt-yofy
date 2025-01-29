@@ -9,7 +9,7 @@ from torch.utils.data.dataset import Subset
 from llm.llm import logger, cfg
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.architecture.gpt_model import GPTModel
-from llm.llm.pipelines.inferencing.text_inferencer import TextProvider
+from llm.llm.pipelines.inference.text_inferencer import TextProvider
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.data_ingestion.data_loader import \
@@ -17,6 +17,41 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
 
 
 torch.manual_seed(123)
+
+
+@pytest.fixture
+def loaders() -> Tuple[DataLoader, DataLoader]:
+    client: TchumytMongoClient = TchumytMongoClient(
+        "llm/configs/dataset_loader_config.yaml"
+    )
+
+    # Generator to enabling split dataset into train and validation subsets
+    generator1: torch.Generator = torch.Generator().manual_seed(42)
+
+    # Creates a list with both subsets
+    dataset: List[Subset] = torch.utils.data.random_split(
+        CrawlDataset(client=client),
+        [0.9, 0.1],
+        generator=generator1
+        )
+
+    # Assigns train and validation datasets accordingly
+    train_dataset: Subset = dataset[0]
+    validation_dataset: Subset = dataset[1]
+
+    train_loader: DataLoader = create_crawl_dataset_loader(
+        crawl_dataset=train_dataset,
+        batch_size=8,
+        shuffle=False
+    )
+
+    validation_loader: DataLoader = create_crawl_dataset_loader(
+        crawl_dataset=validation_dataset,
+        batch_size=8,
+        shuffle=False
+    )
+
+    return (train_loader, validation_loader)
 
 
 @pytest.fixture
@@ -174,6 +209,28 @@ def test_calculate_epoch_loss(
 
     assert train_loss == pytest.approx(11.02646)
     assert validation_loss == pytest.approx(11.02582)
+
+    logger.info(f"Training loss: {train_loss:.5f}")
+    logger.info(f"Training loss: {validation_loss:.5f}")
+
+
+def test_evaluate_model(
+        model: GPTModel,
+        loaders: Tuple[DataLoader, DataLoader],
+        in_an_out_gpu
+        ):
+
+    logger.info(f"Device set to: [{in_an_out_gpu[3]}]")
+    evaluator: Evaluator = Evaluator(model, device=in_an_out_gpu[3])
+
+    train_loss, validation_loss = evaluator.evaluate_model(
+        loaders[0],
+        loaders[1],
+        eval_iter=5
+        )
+
+    assert train_loss == pytest.approx(11.02940)
+    assert validation_loss == pytest.approx(11.03002)
 
     logger.info(f"Training loss: {train_loss:.5f}")
     logger.info(f"Training loss: {validation_loss:.5f}")
