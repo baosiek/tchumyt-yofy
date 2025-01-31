@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 from llm.llm import cfg, logger
 from llm.llm.pipelines.inference.text_inferencer import TextProvider
+from llm.llm.architecture.gpt_model import GPTModel
 
 
 @pytest.fixture()
@@ -58,3 +59,21 @@ def test_generate_text(text_with_ids: Tuple[str, List[int], str]):
     expected: str = text_with_ids[2]
 
     assert expected == output
+
+
+def test_produce_text():
+    torch.manual_seed(456)
+
+    model: GPTModel = GPTModel(cfg=cfg)
+    text_provider: TextProvider = TextProvider(cfg=cfg)
+    text_provider.set_model(model)
+
+    start_context: str = "Every effort moves you"
+    text_produced: str = text_provider.produce_text(
+        start_context=start_context
+        )
+
+    logger.info(f"Produced_text: {text_produced}")
+
+    assert text_provider.text_to_token_ids(text_produced).shape[1] == 54
+

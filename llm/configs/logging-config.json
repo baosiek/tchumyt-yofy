@@ -32,7 +32,7 @@
             "class": "logging.FileHandler",
             "filename": "llm/logs/project.log",
             "formatter": "detailed",
-            "level": "INFO",
+            "level": "DEBUG",
             "mode": "w"
         }
     },
@@ -44,7 +44,7 @@
         },
         "gpt_model": {
             "handlers": ["console", "project_handler"],
-            "level": "INFO",
+            "level": "DEBUG",
             "propagate": "True"
         }
     }
