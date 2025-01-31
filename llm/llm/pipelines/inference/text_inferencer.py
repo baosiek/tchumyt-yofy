@@ -19,6 +19,9 @@ class TextProvider():
         self.model: GPTModel = GPTModel(cfg=cfg)
         self.sequence_length: int = cfg['sequence_length']
 
+    def set_model(self, model: GPTModel) -> None:
+        self.model = model
+
     def generate_text(
             self,
             input: torch.Tensor,
@@ -51,3 +54,17 @@ class TextProvider():
     def token_ids_to_text(self, token_ids: torch.Tensor) -> str:
         flat: torch.Tensor = token_ids.squeeze(0)
         return self.tokenizer.decode(flat.tolist())
+
+    def produce_text(self, start_context: str) -> str:
+
+        self.model.eval()
+        context_size: int = self.model.positional_embedding.pe.shape[1]
+        encoded = self.text_to_token_ids(start_context)
+        with torch.no_grad():
+            token_ids = self.generate_text(encoded, max_new_tokens=50)
+
+        decoded_text = self.token_ids_to_text(token_ids=token_ids)
+
+        self.model.train()
+
+        return decoded_text
