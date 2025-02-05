@@ -62,8 +62,8 @@ class GPTModel(nn.Module):
                 positional encoding added
         """
 
-        x = self.token_embedding(x)        
-        x = self.positional_embedding(x)        
-        x = self.transformer_blocks(x)        
-        x = self.norm_layer(x)        
+        x = self.token_embedding(x)
+        x = self.positional_embedding(x)
+        x = self.transformer_blocks(x)
+        x = self.norm_layer(x)
         return self.output(x)
