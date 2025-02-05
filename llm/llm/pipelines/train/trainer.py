@@ -1,3 +1,4 @@
+import datetime
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
@@ -64,8 +65,9 @@ class Trainer():
         # Initialize training performance parameters stores.
         train_losses, validation_losses = [], []
         track_tokens_seen, texts_generated = [], []
+        start_training: datetime.datetime = datetime.datetime.now()
 
-        # Initialize training progress variables
+        # Initialize training progress tracking variables
         tokens_seen, global_step = 0, -1
         best_loss: float = float('inf')
 
@@ -80,6 +82,11 @@ class Trainer():
 
         # The training loop
         for epoch in range(num_epochs):
+
+            start_epoch: datetime.datetime = datetime.datetime.now()
+
+            # Epoch batches progress monitor
+            epoch_batches: int = 0
 
             # Set the mode of the model to train
             self.model.train()
@@ -103,6 +110,7 @@ class Trainer():
                 # update training progress variables
                 tokens_seen += input_batch.numel()
                 global_step += 1
+                epoch_batches += 1
 
                 if global_step % eval_freq == 0:
                     train_loss, val_loss = self.evaluator.evaluate_model(
@@ -119,9 +127,18 @@ class Trainer():
                     # logs the progress
                     logger.info(
                         f"Epoch: {epoch + 1} "
+                        f"(Batches: {epoch_batches:06d}) "
                         f"(Step {global_step:06d}): "
-                        f"Train loss {train_loss:.3f}, "
-                        f"Val loss {val_loss:.3f}")
+                        f"Train loss {train_loss:.6f}, "
+                        f"Val loss {val_loss:.6f}")
+                    
+            # logs epoch final losses
+            logger.info(
+                f"Epoch: {epoch + 1} "
+                f"(Batches: {epoch_batches:06d}) "
+                f"(Step {global_step:06d}): "
+                f"Train loss {train_loss:.6f}, "
+                f"Val loss {val_loss:.6f}")
 
             text_generated: str = self.text_generator.generate_text(
                 start_context=start_context
@@ -131,7 +148,8 @@ class Trainer():
             texts_generated.append(text_generated)
 
             # Logs the generated text
-            logger.info(f"Text generated after epoch [{epoch + 1}]: {text_generated}")
+            logger.info("Text Epoch: "
+                        f"{epoch + 1}\n[\"{text_generated}\"]")
 
             if best_loss > val_loss:
                 self.save_model('llm/models/best_gpt_model.pth')
@@ -139,8 +157,33 @@ class Trainer():
 
             self.save_model('llm/models/gpt_model.pth')
 
-        return train_losses, validation_losses, track_tokens_seen, texts_generated
+            # register the moment epoch finishes
+            end_epoch: datetime.datetime = datetime.datetime.now()
+
+            # logs epoch processing time
+            elapsed_time: datetime.timedelta = end_epoch - start_epoch
+            logger.info(
+                f"Epoch: {epoch + 1} "
+                f"Processing time: {datetime.timedelta(
+                    elapsed_time.days, elapsed_time.seconds
+                )}"
+            )
+
+        # register the moment epoch finishes
+        end_training: datetime.datetime = datetime.datetime.now()
+
+        # logs epoch processing time
+        elapsed_time = end_training - start_training
+
+        logger.info(
+            f"Training: {epoch + 1} "
+            f"Processing time: {datetime.timedelta(
+                elapsed_time.days, elapsed_time.seconds
+            )}"
+        )
+
+        return train_losses, validation_losses, \
+            track_tokens_seen, texts_generated
 
     def save_model(self, model_name: str) -> None:
         torch.save(self.model.state_dict(), model_name)
-
