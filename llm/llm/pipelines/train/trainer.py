@@ -131,7 +131,7 @@ class Trainer():
                         f"(Step {global_step:06d}): "
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}")
-                    
+
             # logs epoch final losses
             logger.info(
                 f"Epoch: {epoch + 1} "
