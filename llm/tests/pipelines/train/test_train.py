@@ -19,7 +19,7 @@ from llm.llm import cfg, trainer_cfg, logger
 
 @pytest.fixture()
 def start_context() -> str:
-    return "Every step moves you"
+    return "Trump is the president"
 
 
 @pytest.fixture()
@@ -131,10 +131,11 @@ def test_trainer_train_method(
         device=device
     )
 
-    texts = trainer.train(
-        loaders[0],
-        loaders[1],
-        start_context
-    )[3]
+    train_losses, validation_losses, track_tokens_seen, texts_generated = \
+        trainer.train(
+            loaders[0],
+            loaders[1],
+            start_context
+        )
 
-    assert len(texts) == trainer_cfg["num_epochs"]
+    assert len(texts_generated) == trainer_cfg["num_epochs"]

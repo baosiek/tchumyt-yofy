@@ -1,9 +1,11 @@
 import datetime
 import torch
+import pickle
+
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from llm.llm import logger
 from llm.llm.architecture.gpt_model import GPTModel
@@ -61,7 +63,7 @@ class Trainer():
             train_loader: DataLoader,
             validation_loader: DataLoader,
             start_context: str
-    ):
+    ) -> Dict[str, List[Any]]:
         # Initialize training performance parameters stores.
         train_losses, validation_losses = [], []
         track_tokens_seen, texts_generated = [], []
@@ -148,14 +150,24 @@ class Trainer():
             texts_generated.append(text_generated)
 
             # Logs the generated text
-            logger.info("Text Epoch: "
-                        f"{epoch + 1}\n[\"{text_generated}\"]")
+            logger.info(f"Epoch: {epoch + 1} Text ->"
+                        f"\n[\"{text_generated}\"]")
 
+            # If val_loss improves, saves model as best one.
             if best_loss > val_loss:
                 self.save_model('llm/models/best_gpt_model.pth')
                 best_loss = val_loss
 
+            # saves model.
             self.save_model('llm/models/gpt_model.pth')
+
+            # Serializes tracking variables
+            self.serialize_objects(
+                train_losses=train_losses,
+                validation_losses=validation_losses,
+                track_tokens_seen=track_tokens_seen,
+                texts_generated=texts_generated
+            )
 
             # register the moment epoch finishes
             end_epoch: datetime.datetime = datetime.datetime.now()
@@ -176,10 +188,17 @@ class Trainer():
         elapsed_time = end_training - start_training
 
         logger.info(
-            f"Training: {epoch + 1} "
-            f"Processing time: {datetime.timedelta(
+            f"Training processing time: {datetime.timedelta(
                 elapsed_time.days, elapsed_time.seconds
             )}"
+        )
+
+        # Serializes tracking variables
+        self.serialize_objects(
+            train_losses=train_losses,
+            validation_losses=validation_losses,
+            track_tokens_seen=track_tokens_seen,
+            texts_generated=texts_generated
         )
 
         return train_losses, validation_losses, \
@@ -187,3 +206,24 @@ class Trainer():
 
     def save_model(self, model_name: str) -> None:
         torch.save(self.model.state_dict(), model_name)
+        logger.info(f"Model saved at: {model_name}")
+
+    def serialize_objects(self,
+                          train_losses: List[float],
+                          validation_losses: List[float],
+                          track_tokens_seen: List[int],
+                          texts_generated: List[str]):
+
+        # Insert objects into a dictionary
+        objects_to_serialize: Dict[str, List[Any]] = {}
+        objects_to_serialize["train_losses"] = train_losses
+        objects_to_serialize["validation_losses"] = validation_losses
+        objects_to_serialize["track_tokens_seen"] = track_tokens_seen
+        objects_to_serialize["texts_generated"] = texts_generated
+
+        # serializes the dictionary
+        path_name: str = "llm/pickle/train_tracking_objects.pkl"
+        with open(path_name, "wb") as file:
+            pickle.dump(objects_to_serialize, file=file)
+
+        logger.info(f"Tracking objects saved at : {path_name}")

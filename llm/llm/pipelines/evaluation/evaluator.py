@@ -4,6 +4,7 @@ from typing import Tuple
 from torch.utils.data import DataLoader
 
 from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm import logger
 
 
 class Evaluator():
@@ -41,6 +42,8 @@ class Evaluator():
             num_batches = len(data_loader)
         else:
             num_batches = min(num_batches, len(data_loader))
+
+        logger.debug(f"Number of batches to evaluate: {num_batches}")
 
         for i, (input_batch, target_batch) in enumerate(data_loader):
             if i < num_batches:
