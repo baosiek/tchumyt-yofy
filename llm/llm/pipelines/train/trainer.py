@@ -1,8 +1,10 @@
+import torch
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
 from typing import Any, Dict
 
+from llm.llm import logger
 from llm.llm.architecture.gpt_model import GPTModel
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
@@ -25,19 +27,20 @@ class Trainer():
     def __init__(
             self,
             model: GPTModel,
+            text_generator: TextGenerator,
             trainer_cfg: Dict[str, Any],
             device: str
             ) -> None:
 
+        # Trainer configuration
+        self.trainer_cfg: Dict[str, Any] = trainer_cfg
+
         # The initialized model to be trained
-        self.model: GPTModel = model
+        self.model: GPTModel = model.to(device)
 
         # The text generator class that uses the trained model
         # to generate new text
-        text_generator: TextGenerator = TextGenerator(
-            model=self.model,
-            context_length=trainer_cfg["context_length"]
-            )
+        self.text_generator: TextGenerator = text_generator
 
         # The device on which to train
         self.device: str = device
@@ -48,13 +51,96 @@ class Trainer():
         # The optimizer for the trining pipeline
         self.optimizer: AdamW = AdamW(
             model.parameters(),
-            lr=trainer_cfg["lr_rate"],
-            weight_decay=trainer_cfg["weight_decay"]
+            lr=self.trainer_cfg["lr_rate"],
+            weight_decay=self.trainer_cfg["weight_decay"]
             )
 
-    def train():
-        pass
+    def train(
+            self,
+            train_loader: DataLoader,
+            validation_loader: DataLoader,
+            start_context: str
+    ):
+        # Initialize training performance parameters stores.
+        train_losses, validation_losses = [], []
+        track_tokens_seen, texts_generated = [], []
 
-    def save_model():
-        pass
+        # Initialize training progress variables
+        tokens_seen, global_step = 0, -1
+        best_loss: float = float('inf')
+
+        # Retrieves the number of epochs to iterate
+        num_epochs: int = self.trainer_cfg["num_epochs"]
+
+        # Retrieves the evaluation frequency
+        eval_freq: int = self.trainer_cfg["eval_freq"]
+
+        # Retrieves the number of batches to use in the evaluation
+        eval_num_batches: int = self.trainer_cfg["eval_iter"]
+
+        # The training loop
+        for epoch in range(num_epochs):
+
+            # Set the mode of the model to train
+            self.model.train()
+
+            # For each batch
+            for input_batch, target_batch in train_loader:
+                # reset the gradients
+                self.optimizer.zero_grad()
+
+                # computes the batch loss
+                loss: torch = self.evaluator.calculate_batch_loss(
+                    input_batch=input_batch, target_batch=target_batch
+                )
+
+                # Back propagate
+                loss.backward()
+
+                # Adjusts all model parameters based on loss back propagation
+                self.optimizer.step()
+
+                # update training progress variables
+                tokens_seen += input_batch.numel()
+                global_step += 1
+
+                if global_step % eval_freq == 0:
+                    train_loss, val_loss = self.evaluator.evaluate_model(
+                        train_loader=train_loader,
+                        validation_loader=validation_loader,
+                        eval_iter=eval_num_batches
+                    )
+
+                    # updates training performance data
+                    train_losses.append(train_loss)
+                    validation_losses.append(val_loss)
+                    track_tokens_seen.append(tokens_seen)
+
+                    # logs the progress
+                    logger.info(
+                        f"Epoch: {epoch + 1} "
+                        f"(Step {global_step:06d}): "
+                        f"Train loss {train_loss:.3f}, "
+                        f"Val loss {val_loss:.3f}")
+
+            text_generated: str = self.text_generator.generate_text(
+                start_context=start_context
+            )
+
+            # Update texts generated
+            texts_generated.append(text_generated)
+
+            # Logs the generated text
+            logger.info(f"Text generated after epoch [{epoch + 1}]: {text_generated}")
+
+            if best_loss > val_loss:
+                self.save_model('llm/models/best_gpt_model.pth')
+                best_loss = val_loss
+
+            self.save_model('llm/models/gpt_model.pth')
+
+        return train_losses, validation_losses, track_tokens_seen, texts_generated
+
+    def save_model(self, model_name: str) -> None:
+        torch.save(self.model.state_dict(), model_name)
 
