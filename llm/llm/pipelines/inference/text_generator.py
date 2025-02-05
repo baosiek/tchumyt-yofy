@@ -120,8 +120,15 @@ class TextGenerator():
 
     def generate_text(self, start_context: str) -> str:
 
+        # get the device it should run
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
         self.model.eval()
-        encoded = self.text_to_token_ids(start_context)
+
+        encoded: torch.Tensor = self.text_to_token_ids(start_context).to(
+            device=device
+        )
+
         with torch.no_grad():
             token_ids = self.to_text(encoded, max_new_tokens=50)
 
