@@ -48,6 +48,7 @@ def loaders(mock_data, mocker) -> Tuple[DataLoader, DataLoader]:
         "llm.llm.utils.tchumyt_mongo_client.TchumytMongoClient.query",
         return_value=mock_response.query.return_value
     )
+
     client: TchumytMongoClient = TchumytMongoClient(
         "llm/configs/dataset_loader_config.yaml"
     )

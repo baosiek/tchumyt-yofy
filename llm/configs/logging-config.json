@@ -44,7 +44,7 @@
         },
         "gpt_model": {
             "handlers": ["console", "project_handler"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": "True"
         }
     }
