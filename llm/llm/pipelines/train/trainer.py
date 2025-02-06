@@ -96,12 +96,10 @@ class Trainer():
             self.model.train()
 
             # tracks the amount of batches processed
-            batch_average_process: timedelta = timedelta(seconds=0)
+            start_batch: datetime.datetime = datetime.datetime.now()
 
             # For each batch
             for input_batch, target_batch in train_loader:
-
-                start_batch: datetime.datetime = datetime.datetime.now()
 
                 # reset the gradients
                 self.optimizer.zero_grad()
@@ -123,10 +121,7 @@ class Trainer():
                 epoch_batches += 1
 
                 # end of batch
-                end_batch: datetime.datetime = datetime.datetime.now()
-                # accumulate
-                batch_average_process = \
-                    batch_average_process + (end_batch - start_batch)
+                elapsed = datetime.datetime.now() - start_batch
 
                 if global_step % eval_freq == 0:
                     train_loss, val_loss = self.evaluator.evaluate_model(
@@ -148,8 +143,8 @@ class Trainer():
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}, "
                         f"Elapsed {(timedelta(
-                            batch_average_process.days,
-                            batch_average_process.seconds))}"
+                            elapsed.days,
+                            elapsed.seconds))}"
                         )
 
             # logs epoch final losses
@@ -160,8 +155,8 @@ class Trainer():
                 f"Train loss {train_loss:.6f}, "
                 f"Val loss {val_loss:.6f} ,"
                 f"Elapsed {(timedelta(
-                    batch_average_process.days,
-                    batch_average_process.seconds))}"
+                    elapsed.days,
+                    elapsed.seconds))}"
                 )
 
             text_generated: str = self.text_generator.generate_text(

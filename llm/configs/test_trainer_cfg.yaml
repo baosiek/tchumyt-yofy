@@ -2,8 +2,8 @@ name: Trainer for GPTModel
 batch_size: 10
 lr_rate: 0.0004
 weight_decay: 0.1
-num_epochs: 2
-eval_freq: 100
+num_epochs: 10
+eval_freq: 200
 temperature: 0.1
 eval_iter: 250
 context_length: 1024
