@@ -2,6 +2,7 @@ import datetime
 import torch
 import pickle
 
+from datetime import timedelta
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
@@ -85,6 +86,7 @@ class Trainer():
         # The training loop
         for epoch in range(num_epochs):
 
+            # tracks processing time for batches
             start_epoch: datetime.datetime = datetime.datetime.now()
 
             # Epoch batches progress monitor
@@ -93,8 +95,14 @@ class Trainer():
             # Set the mode of the model to train
             self.model.train()
 
+            # tracks the amount of batches processed
+            batch_average_process: timedelta = timedelta(seconds=0)
+
             # For each batch
             for input_batch, target_batch in train_loader:
+
+                start_batch: datetime.datetime = datetime.datetime.now()
+
                 # reset the gradients
                 self.optimizer.zero_grad()
 
@@ -114,6 +122,12 @@ class Trainer():
                 global_step += 1
                 epoch_batches += 1
 
+                # end of batch
+                end_batch: datetime.datetime = datetime.datetime.now()
+                # accumulate
+                batch_average_process = \
+                    batch_average_process + (end_batch - start_batch)
+
                 if global_step % eval_freq == 0:
                     train_loss, val_loss = self.evaluator.evaluate_model(
                         train_loader=train_loader,
@@ -132,15 +146,23 @@ class Trainer():
                         f"(Batches: {epoch_batches:06d}) "
                         f"(Step {global_step:06d}): "
                         f"Train loss {train_loss:.6f}, "
-                        f"Val loss {val_loss:.6f}")
+                        f"Val loss {val_loss:.6f}, "
+                        f"Elapsed {(timedelta(
+                            batch_average_process.days,
+                            batch_average_process.seconds))}"
+                        )
 
             # logs epoch final losses
             logger.info(
                 f"Epoch: {epoch + 1} "
-                f"(Batches: {epoch_batches:06d}) "
+                f"(Batches: {epoch_batches:05d}) "
                 f"(Step {global_step:06d}): "
                 f"Train loss {train_loss:.6f}, "
-                f"Val loss {val_loss:.6f}")
+                f"Val loss {val_loss:.6f} ,"
+                f"Elapsed {(timedelta(
+                    batch_average_process.days,
+                    batch_average_process.seconds))}"
+                )
 
             text_generated: str = self.text_generator.generate_text(
                 start_context=start_context
