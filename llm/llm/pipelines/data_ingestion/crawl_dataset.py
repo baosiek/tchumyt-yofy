@@ -2,7 +2,7 @@ from torch import tensor
 from torch.utils.data import Dataset
 from typing import List
 
-from llm.utils.tchumyt_mongo_client import TchumytMongoClient
+from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 
 
 class CrawlDataset(Dataset):

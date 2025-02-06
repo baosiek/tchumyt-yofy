@@ -1,9 +1,0 @@
-name: GPT_124M_Test
-vocabulary_size: 50257
-sequence_length: 1024
-embedding_dimension: 1024
-number_heads: 16
-number_layers: 24
-drop_rate: 0.2
-attention_mask: False
-bias: False

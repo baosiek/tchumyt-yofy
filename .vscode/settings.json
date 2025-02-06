@@ -1,7 +1,14 @@
 {
     "cSpell.words": [
+        "baosiek",
         "bson",
+        "endoftext",
         "GELU",
+        "inferencer",
+        "inferencing",
+        "keepdim",
+        "pydantic",
+        "tiktoken",
         "tril",
         "triu",
         "yamls"

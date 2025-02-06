@@ -50,6 +50,10 @@ class GPTModel(nn.Module):
             bias=cfg['bias']
         )
 
+        logger.info("Model initialized with configuration:")
+        for key in cfg.keys():
+            logger.info(f"{key}: {cfg[key]}")
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
             Forward pass for applying GPTModel.
@@ -63,13 +67,8 @@ class GPTModel(nn.Module):
                 positional encoding added
         """
 
-        logger.debug(f"x input shape: {x.shape}")
         x = self.token_embedding(x)
-        logger.debug(f"x after token embedding: {x.shape}")
         x = self.positional_embedding(x)
-        logger.debug(f"x after positional embedding: {x.shape}")
         x = self.transformer_blocks(x)
-        logger.debug(f"x after attention: {x.shape}")
         x = self.norm_layer(x)
-        logger.debug(f"x after normalization layer: {x.shape}")
         return self.output(x)
