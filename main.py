@@ -80,5 +80,5 @@ if __name__ == "__main__":
     trainer.train(
         train_loader=train_loader,
         validation_loader=validation_loader,
-        start_context="Trump is the president of"
+        start_context="Trump is the president of the United"
     )
