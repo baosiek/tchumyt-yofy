@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from typing import Any, Dict
 
+from llm.llm import logger
 from llm.llm.architecture.positional_encoding import PositionalEncoding
 from llm.llm.architecture.transformer_block import TransformerBlock
 
@@ -48,6 +49,10 @@ class GPTModel(nn.Module):
             cfg['vocabulary_size'],
             bias=cfg['bias']
         )
+
+        logger.info("Model initialized with configuration:")
+        for key in cfg.keys():
+            logger.info(f"{key}: {cfg[key]}")
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
