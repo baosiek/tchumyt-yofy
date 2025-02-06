@@ -243,7 +243,7 @@ class Trainer():
         objects_to_serialize["texts_generated"] = texts_generated
 
         # serializes the dictionary
-        path_name: str = "llm/pickle/train_tracking_objects.pkl"
+        path_name: str = "llm/pickle_objects/train_tracking_objects.pkl"
         with open(path_name, "wb") as file:
             pickle.dump(objects_to_serialize, file=file)
 
