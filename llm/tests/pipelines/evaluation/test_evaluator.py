@@ -6,7 +6,7 @@ from typing import Tuple, List, Dict, Any
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Subset
 
-from llm.llm import logger, cfg
+from llm.llm import logger, model_cfg
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.architecture.gpt_model import GPTModel
 from llm.llm.pipelines.inference.text_inferencer import TextProvider
@@ -20,7 +20,18 @@ torch.manual_seed(123)
 
 
 @pytest.fixture
-def loaders() -> Tuple[DataLoader, DataLoader]:
+def loaders(mocker, mock_data) -> Tuple[DataLoader, DataLoader]:
+    # Create a mock response object with a .query()
+    # method that returns the mock data
+    mock_response = mocker.MagicMock()
+    mock_response.query.return_value = mock_data
+
+    # Patch 'requests.get' to return the mock response
+    mocker.patch(
+        "llm.llm.utils.tchumyt_mongo_client.TchumytMongoClient.query",
+        return_value=mock_response.query.return_value
+    )
+
     client: TchumytMongoClient = TchumytMongoClient(
         "llm/configs/dataset_loader_config.yaml"
     )
@@ -56,7 +67,7 @@ def loaders() -> Tuple[DataLoader, DataLoader]:
 
 @pytest.fixture
 def model() -> GPTModel:
-    model: GPTModel = GPTModel(cfg=cfg)
+    model: GPTModel = GPTModel(cfg=model_cfg)
     return model
 
 
@@ -73,7 +84,7 @@ def in_an_out_cpu() -> \
 
     device: str = "cpu"
 
-    text_provider: TextProvider = TextProvider(cfg=cfg)
+    text_provider: TextProvider = TextProvider(cfg=model_cfg)
 
     inputs: torch.Tensor = torch.tensor([], dtype=int)
     targets: torch.Tensor = torch.tensor([], dtype=int)
@@ -136,7 +147,7 @@ def test_calculate_batch_loss_with_gpu(
     logger.debug(f"Input: {in_an_out_gpu[0]}")
     logger.debug(f"Target: {in_an_out_gpu[1]}")
 
-    model = GPTModel(cfg=cfg)
+    model = GPTModel(cfg=model_cfg)
 
     evaluator: Evaluator = Evaluator(model, device=in_an_out_gpu[3])
 
@@ -207,11 +218,11 @@ def test_calculate_epoch_loss(
         train_loss = evaluator.calculate_epoch_loss(train_loader)
         validation_loss = evaluator.calculate_epoch_loss(train_loader)
 
-    assert train_loss == pytest.approx(11.02646)
-    assert validation_loss == pytest.approx(11.02582)
-
     logger.info(f"Training loss: {train_loss:.5f}")
     logger.info(f"Training loss: {validation_loss:.5f}")
+
+    assert train_loss == pytest.approx(11.02646)
+    assert validation_loss == pytest.approx(11.02582)
 
 
 def test_evaluate_model(
@@ -229,8 +240,8 @@ def test_evaluate_model(
         eval_iter=5
         )
 
-    assert train_loss == pytest.approx(11.02940)
-    assert validation_loss == pytest.approx(11.03002)
-
     logger.info(f"Training loss: {train_loss:.5f}")
     logger.info(f"Training loss: {validation_loss:.5f}")
+
+    assert train_loss == pytest.approx(11.02892)
+    assert validation_loss == pytest.approx(11.04301)

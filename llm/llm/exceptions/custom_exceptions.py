@@ -14,6 +14,12 @@ class EmptyFileError(Exception):
         logger.error(error_message)
 
 
+class LoggerConfigNotFound(Exception):
+    def __init__(self, error_message: str):
+        super().__init__(error_message)
+        logger.error(error_message)
+
+
 def run_tchumyt_exception(mode: str):
     message: str = f"{mode} is a message"
 

@@ -59,6 +59,10 @@ class Trainer():
             weight_decay=self.trainer_cfg["weight_decay"]
             )
 
+        logger.info("Trainer initialized with the following configuration:")
+        for key in self.trainer_cfg.keys():
+            logger.info(f"{key}: {self.trainer_cfg[key]}")
+
     def train(
             self,
             train_loader: DataLoader,

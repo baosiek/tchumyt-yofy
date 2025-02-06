@@ -1,6 +1,7 @@
 import pytest
+import json
 
-from typing import Dict, Any
+from typing import List, Dict, Any
 from torch.utils.data import DataLoader
 from bson.objectid import ObjectId
 
@@ -21,18 +22,38 @@ def query() -> Dict[str, Any]:
 
 
 @pytest.fixture
+def mock_data() -> List[Dict[str, Any]]:
+    with open("llm/resources/testing.json", 'r') as file:
+        mock_data = json.load(file)
+        return mock_data
+
+
+@pytest.fixture
 def parameters() -> Dict[str, Any]:
     batch_size: int = 8
     shuffle: bool = False
     return {"batch_size": batch_size, "shuffle": shuffle}
 
 
-def test_crawl_dataset_loader(pathname: str,
-                              query: Dict[str, Any],
-                              parameters: Dict
+def test_crawl_dataset_loader(mock_data, parameters: Dict,
+                              mocker
                               ):
 
-    client: TchumytMongoClient = TchumytMongoClient(pathname)
+    # Create a mock response object with a .query()
+    # method that returns the mock data
+    mock_response = mocker.MagicMock()
+    mock_response.query.return_value = mock_data
+
+    # # Patch 'TchumytMongoClient.query' to return the mock response
+    mocker.patch(
+        "llm.llm.utils.tchumyt_mongo_client.TchumytMongoClient.query",
+        return_value=mock_response.query.return_value
+    )
+
+    client: TchumytMongoClient = TchumytMongoClient(
+        "llm/configs/dataset_loader_config.yaml"
+    )
+
     dataset: CrawlDataset = CrawlDataset(client=client)
 
     loader: DataLoader = create_crawl_dataset_loader(

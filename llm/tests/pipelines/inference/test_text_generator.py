@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.architecture.gpt_model import GPTModel
-from llm.llm import cfg
+from llm.llm import model_cfg
 
 
 @pytest.fixture()
@@ -19,13 +19,15 @@ def text_with_ids() -> Tuple[str, List[int], str]:
 
 @pytest.fixture
 def model() -> GPTModel:
+    device: str = ("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(456)
-    model: GPTModel = GPTModel(cfg=cfg)
+    model: GPTModel = GPTModel(cfg=model_cfg)
+    model.to(device=device)
     return model
 
 
 def test_text_generated_initialized_correctly():
-    model: GPTModel = GPTModel(cfg=cfg)
+    model: GPTModel = GPTModel(cfg=model_cfg)
     text_generator: TextGenerator = TextGenerator(
         model=model,
         context_length=1024,
