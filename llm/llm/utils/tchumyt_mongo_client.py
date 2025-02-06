@@ -4,13 +4,13 @@ import os
 from typing import Any, Dict
 from pymongo.cursor import Cursor
 
-from llm.utils.yaml_loader import get_yaml_file
+from llm.llm.utils.commons import read_yaml
 from llm.llm import logger
 
 
 class TchumytMongoClient():
     def __init__(self, config: str):
-        configuration: Dict[str, Any] = get_yaml_file(config)
+        configuration: Dict[str, Any] = read_yaml(config)
 
         # Gets username
         username: str = os.getenv("MONGO_INITDB_ROOT_USERNAME")

@@ -3,7 +3,6 @@ import torch.nn as nn
 
 from typing import Dict, Any
 
-from llm.llm import logger
 from llm.llm.architecture.feed_forward import FeedForward
 
 
@@ -54,8 +53,6 @@ class TransformerBlock(nn.Module):
             torch.Tensor of same shape as x with attention added
         """
 
-        logger.debug(f"\tx input shape: {x.shape}")
-
         # Store the input value
         shortcut: torch.Tensor = x
 
@@ -69,22 +66,17 @@ class TransformerBlock(nn.Module):
                     sequence_length),
                 diagonal=1
             ).bool()
-            logger.debug(f"\tAttention mask shape: {attention_mask.shape}")
 
         # Applies the transformer block flow
-        x = self.norm1(x)
-        logger.debug(f"\tx after normalization shape: {x.shape}")
-        x, _ = self.attention(x, x, x, attn_mask=attention_mask)
-        logger.debug(f"\tx after attention shape: {x.shape}")
+        x = self.norm1(x)        
+        x, _ = self.attention(x, x, x, attn_mask=attention_mask)        
         x = self.drop_shortcut(x)
         x = x + shortcut
-        logger.debug(f"\tx after first shortcut shape: {x.shape}")
 
         shortcut = x
         x = self.norm2(x)
         x = self.ff(x)
-        logger.debug(f"\tx after feed forward shape: {x.shape}")
         x = self.drop_shortcut(x)
         x = x + shortcut
-        logger.debug(f"\tx after second shortcut shape: {x.shape}")
+
         return x

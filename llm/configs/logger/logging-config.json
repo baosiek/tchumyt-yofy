@@ -1,0 +1,51 @@
+{
+    "version": 1,
+    "disable_existing_loggers": "False",
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s - %(module)s - %(levelname)s - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+        "detailed": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(module)s - line: %(lineno)d - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+        "simple": {
+            "format": "%(levelname)s - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "DEBUG"
+        },
+        "template_handler": {
+            "class": "logging.FileHandler",
+            "filename": "llm/logs/template.log",
+            "formatter": "detailed",
+            "level": "INFO",
+            "mode": "w"
+        },
+        "project_handler": {
+            "class": "logging.FileHandler",
+            "filename": "llm/logs/project.log",
+            "formatter": "detailed",
+            "level": "DEBUG",
+            "mode": "w"
+        }
+    },
+    "loggers": {
+        "project-template": {
+            "handlers": ["console", "template_handler"],
+            "level": "INFO",
+            "propagate": "False"
+        },
+        "gpt_model": {
+            "handlers": ["console", "project_handler"],
+            "level": "INFO",
+            "propagate": "True"
+        }
+    }
+}

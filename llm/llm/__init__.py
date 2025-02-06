@@ -1,44 +1,137 @@
-import json
+# import json
 import logging
 import logging.config
 import os
+import json
 import yaml
 
-'''
-This module configures the log for the entire package
-'''
+from typing import Dict, Any
 
-# loads and configure logging
-with open('llm/configs/logging-config.json', 'r') as f:
-    config = json.load(f)
-logging.config.dictConfig(config)
 
-# gets this module logger
-logger = logging.getLogger("crawl_model")
+def initialize_logger(log_dir: str) -> logging.Logger:
+    '''
+    This function loads logging configuration file. These files
+    can be one of either logging-config.json, for production, or
+    logging-config-test.json, for test. If logging-config-test.json
+    exists it is loaded first
 
-# loads and model configuration
-test_config: str = "llm/configs/gpt_config_124m_test.yaml"
-prod_config: str = "llm/configs/gpt_config_124m.yaml"
-file_path: str = ""
+    Args:
+        log_dir: str -> the directory where to find log configuration file
 
-"""
-Priority for test configuration.
-In case it is found, loads it. Otherwise tries to 
-load the regular one. If not found either, then
-raises file not found exception.
-"""
+    Return:
+        logger: logging.Logger -> the logger for the application
+    '''
 
-if os.path.exists(test_config):
-    file_path = test_config
-elif os.path.exists(prod_config):
-    file_path = prod_config
-else:
-    raise FileExistsError(
-        f'''
-        Could not find neither {test_config} nor {prod_config}
-        '''.strip()
-    )
+    # production logger configuration
+    prod_path: os.path = os.path.join(log_dir, "logging-config.json")
 
-logger.info(f"Configuration file: {file_path}")
-with open(file_path) as f:
-    cfg = yaml.load(f, Loader=yaml.FullLoader)
+    # test logger configuration
+    test_path: os.path = os.path.join(log_dir, "logging-config-test.json")
+
+    # the chosen file to use
+    log_path: os.path = prod_path
+
+    # initialize logger
+    if os.path.exists(test_path):
+        log_path = test_path
+
+    try:
+        with open(log_path, 'r') as file:
+            config = json.load(file)
+            logging.config.dictConfig(config)
+            logger = logging.getLogger("gpt_model")
+            logger.info(f"logger configured with file: {log_path}")
+    except FileNotFoundError as error:
+        raise error(f"{log_path} was not found")
+
+    return logger
+
+
+def loads_model_configuration(config_dir: str) -> Dict[str, Any]:
+    '''
+    This function loads the model configuration file. These files
+    can be one of either gpt_config.yaml, for production, or
+    gpt_config_test.yaml, for test. If gpt_config_test.yaml
+    exists it is loaded first
+
+    Args:
+        config_dir: str -> the directory where to find configuration file
+
+    Return:
+        trainer_cfg: Dict[str, Any] -> the dictionary with the configuration
+    '''
+
+    # production configuration
+    prod_path: os.path = os.path.join(config_dir, "gpt-config.yaml")
+
+    # test configuration
+    test_path: os.path = os.path.join(config_dir, "gpt-config-test.yaml")
+
+    # the chosen file to use
+    config_path: os.path = prod_path
+
+    # initialize logger
+    if os.path.exists(test_path):
+        config_path = test_path
+
+    # trainer configuration
+    try:
+        with open(config_path, 'r') as file:
+            model_cfg = yaml.safe_load(file)
+    except FileNotFoundError as error:
+        logger.error(f"File [{config_path}] not found")
+        raise error
+
+    return model_cfg
+
+
+def loads_trainer_configuration(config_dir: str) -> Dict[str, Any]:
+    '''
+    This function loads the trainer configuration file. These files
+    can be one of either trainer-cfg.yaml, for production, or
+    trainer-cfg-test.yaml, for test. If trainer-cfg-test.yaml
+    exists it is loaded first
+
+    Args:
+        config_dir: str -> the directory where to find configuration file
+
+    Return:
+        trainer_cfg: Dict[str, Any] -> the dictionary with the configuration
+    '''
+
+    # production configuration
+    prod_path: os.path = os.path.join(config_dir, "trainer-cfg.yaml")
+
+    # test configuration
+    test_path: os.path = os.path.join(config_dir, "trainer-cfg-test.yaml")
+
+    # the chosen file to use
+    config_path: os.path = prod_path
+
+    # initialize logger
+    if os.path.exists(test_path):
+        config_path = test_path
+
+    # trainer configuration
+    try:
+        with open(config_path, 'r') as file:
+            cfg = yaml.safe_load(file)
+    except FileNotFoundError as error:
+        logger.error(f"File [{config_path}] not found")
+        raise error
+
+    return cfg
+
+
+# Initializes the logger
+logger: logging.Logger = initialize_logger("llm/configs/logger")
+
+# Loads trainer configuration
+trainer_cfg: Dict[str, Any] = loads_trainer_configuration(
+    "llm/configs/trainer"
+)
+
+# Loads model configuration
+model_cfg: Dict[str, Any] = loads_model_configuration(
+    "llm/configs/model"
+)
