@@ -77,8 +77,8 @@ if __name__ == "__main__":
         device=device
     )
 
-    trainer.train(
-        train_loader=train_loader,
-        validation_loader=validation_loader,
-        start_context="Trump is the president of the United"
-    )
+    # trainer.train(
+    #     train_loader=train_loader,
+    #     validation_loader=validation_loader,
+    #     start_context="Trump is the president of the United"
+    # )

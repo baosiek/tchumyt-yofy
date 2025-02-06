@@ -14,7 +14,7 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
 from llm.llm.pipelines.train.trainer import Trainer
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 
-from llm.llm import cfg, trainer_cfg, logger
+from llm.llm import model_cfg, trainer_cfg, logger
 
 
 @pytest.fixture()
@@ -24,7 +24,7 @@ def start_context() -> str:
 
 @pytest.fixture()
 def model() -> GPTModel:
-    model: GPTModel = GPTModel(cfg=cfg)
+    model: GPTModel = GPTModel(cfg=model_cfg)
     return model
 
 
@@ -132,7 +132,7 @@ def test_trainer_train_method(
         device=device
     )
 
-    train_losses, validation_losses, track_tokens_seen, texts_generated = \
+    _, _, _, texts_generated = \
         trainer.train(
             loaders[0],
             loaders[1],

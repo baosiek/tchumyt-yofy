@@ -44,12 +44,13 @@ class TextProvider():
         return input
 
     def text_to_token_ids(self, text: str) -> torch.Tensor:
+        device: str = ("cuda" if torch.cuda.is_available() else "cpu")
         encoded: List[int] = self.tokenizer.encode(
             text=text,
             allowed_special={'<|endoftext|>'}
             )
 
-        return torch.tensor(encoded).unsqueeze(0)
+        return torch.tensor(encoded).unsqueeze(0).to(device=device)
 
     def token_ids_to_text(self, token_ids: torch.Tensor) -> str:
         flat: torch.Tensor = token_ids.squeeze(0)
@@ -58,7 +59,6 @@ class TextProvider():
     def produce_text(self, start_context: str) -> str:
 
         self.model.eval()
-        context_size: int = self.model.positional_embedding.pe.shape[1]
         encoded = self.text_to_token_ids(start_context)
         with torch.no_grad():
             token_ids = self.generate_text(encoded, max_new_tokens=50)
