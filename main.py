@@ -12,7 +12,7 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.trainer import Trainer
 
-from llm.llm import logger, cfg, trainer_cfg
+from llm.llm import logger, model_cfg, trainer_cfg
 
 if __name__ == "__main__":
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     logger.info(f"Validation loader length: {len(list(validation_loader))}")
 
     # 3. Initializes the model to be trained
-    model: GPTModel = GPTModel(cfg=cfg)
+    model: GPTModel = GPTModel(cfg=model_cfg)
 
     # 4. Initializes text generator based with model initialized
     text_generator: TextGenerator = TextGenerator(
