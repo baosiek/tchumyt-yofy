@@ -29,7 +29,7 @@ def get_loaders() -> Tuple[DataLoader, DataLoader]:
 
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client, limit=1000),
+        CrawlDataset(client=client, limit=5000),
         [0.9, 0.1],
         generator=generator1
     )
