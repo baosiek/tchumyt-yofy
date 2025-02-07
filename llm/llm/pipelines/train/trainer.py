@@ -87,6 +87,12 @@ class Trainer():
         # Retrieves the number of batches to use in the evaluation
         eval_num_batches: int = self.trainer_cfg["eval_iter"]
 
+        # Number of batches
+        num_batches: int = len(list(train_loader))
+
+        # Total global steps
+        total_global_steps: int = num_batches * num_epochs
+
         # The training loop
         for epoch in range(num_epochs):
 
@@ -141,9 +147,9 @@ class Trainer():
 
                     # logs the progress
                     logger.info(
-                        f"Epoch: {epoch + 1} "
-                        f"(Batches: {epoch_batches:06d}) "
-                        f"(Step {global_step:06d}): "
+                        f"Epoch: {epoch} "
+                        f"({epoch_batches:05d}/{num_batches:05d}) "
+                        f"(Step {global_step:06d}/{total_global_steps:06d}): "
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}, "
                         f"Elapsed {(timedelta(
@@ -151,11 +157,11 @@ class Trainer():
                             elapsed.seconds))}"
                         )
 
-            # logs epoch final losses
+            # logs epoch's final losses
             logger.info(
                 f"Epoch: {epoch + 1} "
-                f"(Batches: {epoch_batches:05d}) "
-                f"(Step {global_step:06d}): "
+                f"({epoch_batches + 1:05d}/{num_batches:05d}) "
+                f"(Step {global_step + 1:06d}/{total_global_steps:06d}): "
                 f"Train loss {train_loss:.6f}, "
                 f"Val loss {val_loss:.6f} ,"
                 f"Elapsed {(timedelta(
