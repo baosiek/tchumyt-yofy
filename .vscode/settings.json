@@ -4,11 +4,13 @@
         "bson",
         "endoftext",
         "GELU",
+        "gptmodel",
         "inferencer",
         "inferencing",
         "keepdim",
         "pydantic",
         "tiktoken",
+        "torchinfo",
         "tril",
         "triu",
         "yamls"
