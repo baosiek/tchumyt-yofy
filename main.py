@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
     client: TchumytMongoClient = TchumytMongoClient(
-        "llm/configs/dataset_loader_config.yaml"
+        "llm/configs/dataset_loader_config.yaml",
     )
 
     # 1.2 Generator to enabling split dataset into train and validation subsets
@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client),
+        CrawlDataset(client=client, limit=100),
         [0.9, 0.1],
         generator=generator1
     )
