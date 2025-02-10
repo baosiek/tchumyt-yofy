@@ -12,6 +12,7 @@ from llm.llm import logger
 from llm.llm.architecture.gpt_model import GPTModel
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
+from llm.llm.pipelines.train.early_stop import EarlyStop
 
 """
 This Trainer class is responsible for thr whole training pipeline
@@ -33,7 +34,8 @@ class Trainer():
             model: GPTModel,
             text_generator: TextGenerator,
             trainer_cfg: Dict[str, Any],
-            device: str
+            device: str,
+            early_stopping: bool = False
             ) -> None:
 
         # Trainer configuration
@@ -59,6 +61,9 @@ class Trainer():
             weight_decay=self.trainer_cfg["weight_decay"]
             )
 
+        # Weather or not to early stop
+        self.early_stopping: bool = early_stopping
+
         logger.info("Trainer initialized with the following configuration:")
         for key in self.trainer_cfg.keys():
             logger.info(f"{key}: {self.trainer_cfg[key]}")
@@ -76,7 +81,16 @@ class Trainer():
 
         # Initialize training progress tracking variables
         tokens_seen, global_step = 0, -1
-        best_loss: float = float('inf')
+        best_loss: float = None
+        early_stop: EarlyStop = None
+
+        if self.early_stopping:
+            early_stop = EarlyStop(
+                patience=self.trainer_cfg["patience"],
+                delta=self.trainer_cfg["delta"]
+            )
+        else:
+            best_loss: float = float('inf')
 
         # Retrieves the number of epochs to iterate
         num_epochs: int = self.trainer_cfg["num_epochs"]
@@ -180,11 +194,6 @@ class Trainer():
             logger.info(f"Epoch: {epoch + 1} Text ->"
                         f"\n[\"{text_generated}\"]")
 
-            # If val_loss improves, saves model as best one.
-            if best_loss > val_loss:
-                self.save_model('llm/models/best_gpt_model.pth')
-                best_loss = val_loss
-
             # saves model.
             self.save_model('llm/models/gpt_model.pth')
 
@@ -208,6 +217,27 @@ class Trainer():
                 )}"
             )
 
+            # Checks if early stopping is set
+            if self.early_stopping:
+                # Process early stop logic
+                early_stop(validation_loss=val_loss)
+
+                # If patience limit achieved
+                if early_stop.early_stop:
+                    logger.info("Early stopping. Exiting training.")
+                    break
+
+                else:
+                    # Checks for best model
+                    if early_stop.best_score > val_loss:
+                        self.save_model('llm/models/best_gpt_model.pth')
+
+            else:
+                # If val_loss improves, saves model as best one.
+                if best_loss > val_loss:
+                    self.save_model('llm/models/best_gpt_model.pth')
+                    best_loss = val_loss
+
         # register the moment epoch finishes
         end_training: datetime.datetime = datetime.datetime.now()
 
@@ -218,14 +248,6 @@ class Trainer():
             f"Training processing time: {datetime.timedelta(
                 elapsed_time.days, elapsed_time.seconds
             )}"
-        )
-
-        # Serializes tracking variables
-        self.serialize_objects(
-            train_losses=train_losses,
-            validation_losses=validation_losses,
-            track_tokens_seen=track_tokens_seen,
-            texts_generated=texts_generated
         )
 
         return train_losses, validation_losses, \
