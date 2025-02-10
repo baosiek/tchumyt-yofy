@@ -5,6 +5,6 @@ weight_decay: 0.1
 num_epochs: 10
 eval_freq: 100
 temperature: 0.1
-eval_iter: 36
+eval_iter: 
 context_length: 1024
 tiktoken_encoding: "gpt2"
