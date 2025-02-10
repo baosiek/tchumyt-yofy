@@ -13,7 +13,9 @@
         "torchinfo",
         "tril",
         "triu",
-        "yamls"
+        "xlabel",
+        "yamls",
+        "ylabel"
     ],
     "python.testing.unittestArgs": [
         "-v",
