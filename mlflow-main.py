@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Tuple
 from torchinfo import summary
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Subset
+from mlflow import MlflowClient
+
 
 from llm.llm import logger, model_cfg, trainer_cfg
 from llm.llm.architecture.gpt_model import GPTModel
@@ -29,7 +31,7 @@ def get_loaders() -> Tuple[DataLoader, DataLoader]:
 
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client, limit=5000),
+        CrawlDataset(client=client),
         [0.9, 0.1],
         generator=generator1
     )
@@ -118,8 +120,15 @@ def main():
         # Log metrics that were calculated during training
         mlflow.log_metrics(metrics)
 
+        metadata = {"description": "this is a test", "Description": "This is also a test"}
+
         # Logs the model
-        mlflow.pytorch.log_model(model, "model")
+        mlflow.pytorch.log_model(
+            model,
+            artifact_path=artifact_path,
+            registered_model_name="gpt_model_politics",
+            metadata=metadata
+            )
 
 
 if __name__ == "__main__":
@@ -136,8 +145,23 @@ if __name__ == "__main__":
     run_name = "politics_gptmodel_test"
 
     # Define an artifact path that the model will be saved to.
-    artifact_path = "politics_gptmodel"
+    artifact_path = \
+        "mlflow-artifacts:/585006454050763634/model/politics_gptmodel"
 
     main()
+
+    client = MlflowClient(mlflow.get_tracking_uri())
+    model_info = client.get_latest_versions('gpt_model_politics')[0]
+    client.set_registered_model_alias(
+        "gpt_model_politics",
+        "challenger",
+        model_info.version
+    )
+    client.set_model_version_tag(
+        name='gpt_model_politics',
+        version=model_info.version,
+        key='nlp',
+        value='text_generation'
+    )
 
     logger.info("The End!")
