@@ -120,7 +120,8 @@ def main():
         # Log metrics that were calculated during training
         mlflow.log_metrics(metrics)
 
-        metadata = {"description": "this is a test", "Description": "This is also a test"}
+        metadata = {"description": "this is a test",
+                    "Description": "This is also a test"}
 
         # Logs the model
         mlflow.pytorch.log_model(
