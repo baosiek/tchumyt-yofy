@@ -61,8 +61,16 @@ class Trainer():
             weight_decay=self.trainer_cfg["weight_decay"]
             )
 
-        # Weather or not to early stop
-        self.early_stopping: bool = early_stopping
+        # # Weather or not to early stop
+        # self.early_stopping: bool = early_stopping
+        # Initializes early stopping
+        self.early_stop: EarlyStop = None
+        if early_stopping:
+            self.early_stop = EarlyStop(
+                patience=self.trainer_cfg["patience"],
+                delta=self.trainer_cfg["delta"],
+                best_model_path='llm/models/best_gpt_model.pth'
+            )
 
         logger.info("Trainer initialized with the following configuration:")
         for key in self.trainer_cfg.keys():
@@ -82,14 +90,8 @@ class Trainer():
         # Initialize training progress tracking variables
         tokens_seen, global_step = 0, -1
         best_loss: float = None
-        early_stop: EarlyStop = None
 
-        if self.early_stopping:
-            early_stop = EarlyStop(
-                patience=self.trainer_cfg["patience"],
-                delta=self.trainer_cfg["delta"]
-            )
-        else:
+        if self.early_stop is None:
             best_loss: float = float('inf')
 
         # Retrieves the number of epochs to iterate
@@ -218,19 +220,14 @@ class Trainer():
             )
 
             # Checks if early stopping is set
-            if self.early_stopping:
+            if self.early_stop is not None:
                 # Process early stop logic
-                early_stop(validation_loss=val_loss)
+                self.early_stop(model=self.model, validation_loss=val_loss)
 
                 # If patience limit achieved
-                if early_stop.early_stop:
+                if self.early_stop.early_stop:
                     logger.info("Early stopping. Exiting training.")
                     break
-
-                else:
-                    # Checks for best model
-                    if early_stop.best_score > val_loss:
-                        self.save_model('llm/models/best_gpt_model.pth')
 
             else:
                 # If val_loss improves, saves model as best one.
