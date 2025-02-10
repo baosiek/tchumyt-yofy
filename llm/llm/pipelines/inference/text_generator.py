@@ -8,7 +8,7 @@ from llm.llm import logger
 from llm.llm.architecture.gpt_model import GPTModel
 
 """
-This Trainer class is responsible for thr whole training pipeline
+This Trainer class is responsible for the whole training pipeline
 
 Args:
     model: GPTModel -> The initialized model to be trained
@@ -38,7 +38,7 @@ class TextGenerator():
         # The context length
         self.context_length: int = context_length
 
-        logger.debug(f"Text genertor initialized. "
+        logger.debug(f"Text generator initialized. "
                      f"Context length: {context_length} "
                      f"- Tokenizer encoding: {encoding}")
 
