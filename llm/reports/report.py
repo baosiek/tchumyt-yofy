@@ -52,7 +52,7 @@ def plot_training_performance(
     # Set the location of the legend
     ax1.legend(loc="upper right")
 
-    # Set the location of the ticker 
+    # Set the location of the ticker
     ax1.xaxis.set_major_locator(MaxNLocator(integer=True))
 
     # Sets the second x axis, ie, the upper horizontal axis
