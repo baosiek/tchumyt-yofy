@@ -1,8 +1,15 @@
+import torch
+
+from llm.llm import logger
+from llm.llm.architecture.gpt_model import GPTModel
+
+
 class EarlyStop():
     def __init__(
             self,
             patience: int,
-            delta: float
+            delta: float,
+            best_model_path: str
     ) -> None:
         '''
         Early stop initialization
@@ -10,6 +17,7 @@ class EarlyStop():
             patience: int -> number of epochs before early stopping
             delta: float ->  minimum amount of improvement in the loss
                 to NOT early stop
+            best_model_path: str -> location where to save the best model
 
         Return:
             None
@@ -26,8 +34,12 @@ class EarlyStop():
         # The counter up to patience
         self.counter: int = 0
 
+        # Location of best model
+        self.best_model_path: str = best_model_path
+
     def __call__(
             self,
+            model: GPTModel,
             validation_loss: float
     ) -> None:
 
@@ -40,9 +52,10 @@ class EarlyStop():
             None
         '''
 
-        # First iteration sets the best score
+        # First iteration sets the best score and saves the model
         if self.best_score is None:
             self.best_score = validation_loss
+            self.save_model(model)
 
         # If validations has no improvement
         elif validation_loss < self.best_score + self.delta:
@@ -57,6 +70,11 @@ class EarlyStop():
         # Validation was improved
         else:
             self.best_score = validation_loss
+            self.save_model(model=model)
 
             # Resets the counter
             self.counter = 0
+
+    def save_model(self, model: GPTModel):
+        torch.save(model.state_dict(), self.best_model_path)
+        logger.info(f"Best model saved at: {self.best_model_path}")

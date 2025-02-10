@@ -23,6 +23,26 @@ def start_context() -> str:
 
 
 @pytest.fixture()
+def mock_cfg_data() -> Dict[str, Any]:
+
+    mock_cfg_data: Dict[str, Any] = {
+        "name": "Trainer for GPTModel",
+        "batch_size": 8,
+        "lr_rate": 0.0004,
+        "weight_decay": 0.1,
+        "num_epochs": 5,
+        "eval_freq": 100,
+        "temperature": 0.1,
+        "eval_iter": 100,
+        "context_length": 1024,
+        "patience": 2,
+        "delta": 1.0000,
+        "tiktoken_encoding": "gpt2"
+    }
+    return mock_cfg_data
+
+
+@pytest.fixture()
 def model() -> GPTModel:
     model: GPTModel = GPTModel(cfg=model_cfg)
     return model
@@ -111,7 +131,7 @@ def test_trainer_initialization(
     )
 
 
-def test_trainer_train_method(
+def test_trainer_train_method_no_early_stop(
           start_context: str,
           loaders: Tuple[DataLoader, DataLoader],
           model: GPTModel
@@ -140,3 +160,37 @@ def test_trainer_train_method(
         )
 
     assert len(texts_generated) == trainer_cfg["num_epochs"]
+
+
+def test_trainer_train_method_early_stopping(
+          start_context: str,
+          loaders: Tuple[DataLoader, DataLoader],
+          model: GPTModel,
+          mock_cfg_data: Dict[str, Any],
+          mocker
+        ) -> None:
+
+    device: str = torch.device(
+             "cuda" if torch.cuda.is_available() else "cpu"
+             )
+
+    text_generator: TextGenerator = TextGenerator(
+        model=model, context_length=1024, encoding="gpt2"
+    )
+
+    trainer: Trainer = Trainer(
+        model=model,
+        text_generator=text_generator,
+        trainer_cfg=mock_cfg_data,
+        device=device,
+        early_stopping=True
+    )
+
+    _, _, _, texts_generated = \
+        trainer.train(
+            loaders[0],
+            loaders[1],
+            start_context
+        )
+
+    assert trainer.early_stop.early_stop is True

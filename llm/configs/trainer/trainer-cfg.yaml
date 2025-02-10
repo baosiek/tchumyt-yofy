@@ -7,4 +7,6 @@ eval_freq: 200
 temperature: 0.1
 eval_iter: 250
 context_length: 1024
+patience: 5
+delta: 0.001
 tiktoken_encoding: "gpt2"
