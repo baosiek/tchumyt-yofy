@@ -88,7 +88,8 @@ class TextGenerator():
     def to_text(
             self,
             input: torch.Tensor,
-            max_new_tokens: int
+            max_new_tokens: int,
+            decode_strategy
             ) -> torch.Tensor:
         '''
         This method generates max_new_tokens drawn from the model
@@ -107,10 +108,12 @@ class TextGenerator():
                 logits: torch.Tensor = self.model(input_trimmed)
 
             logits = logits[:, -1, :]
-            prob: torch.Tensor = torch.softmax(logits, dim=-1)
+            # prob: torch.Tensor = torch.softmax(logits, dim=-1)
 
-            # greedy decoding
-            next_token: torch.Tensor = torch.argmax(prob, dim=-1, keepdim=True)
+            # #decodes strategy
+            # next_token: torch.Tensor = torch.argmax(prob, dim=-1, keepdim=True)
+            # next_token: torch.Tensor = torch.multinomial(prob, num_samples=1).item()
+            next_token: torch.Tensor = decode_strategy(logits)
 
             input = torch.cat((input, next_token), dim=1)
 
@@ -118,7 +121,11 @@ class TextGenerator():
 
         return input
 
-    def generate_text(self, start_context: str) -> str:
+    def generate_text(
+            self,
+            start_context: str,
+            decode_strategy
+        ) -> str:
 
         # get the device it should run
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -139,3 +146,18 @@ class TextGenerator():
         logger.debug(f"New text: {decoded_text}")
 
         return decoded_text
+
+
+# this function returns the max argument from a probability distribution
+def greedy_decoding(logits: torch.Tensor) -> torch.Tensor:
+    prob: torch.Tensor = torch.softmax(logits, dim=-1)
+    return torch.argmax(prob, dim=-1, keepdim=True)
+
+
+# this function returns one tensor sampled from a multinomial distribution
+def temperature_scaling(
+        logits: torch.Tensor,
+        temperature: float
+        ) -> torch.Tensor:
+    scaled_logits: torch.Tensor = logits / temperature
+    return torch.multinomial(scaled_logits, num_samples=1).item()

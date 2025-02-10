@@ -8,6 +8,7 @@
         "inferencer",
         "inferencing",
         "keepdim",
+        "multinomial",
         "pydantic",
         "tiktoken",
         "torchinfo",

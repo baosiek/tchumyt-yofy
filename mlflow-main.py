@@ -101,6 +101,7 @@ def main():
         # Log model summary to both local and MLFlow.
         with open("llm/reports/model_summary.txt", "w") as f:
             f.write(str(summary(model)))
+
         mlflow.log_artifact("llm/reports/model_summary.txt")
 
         train_losses, validation_losses, \
@@ -130,6 +131,12 @@ def main():
             registered_model_name="gpt_model_politics",
             metadata=metadata
             )
+
+        # Saves the training log
+        mlflow.log_artifacts("llm/logs/project.log")
+
+        # Saves the training performance
+        mlflow.log_artifacts("llm/pickle_objects/train_tracking_objects.pkl")
 
 
 if __name__ == "__main__":
