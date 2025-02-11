@@ -6,6 +6,7 @@ from typing import List
 
 from llm.llm import logger
 from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.components.decoding_strategies import AbstractDecodeStrategy
 
 """
 This Trainer class is responsible for the whole training pipeline
@@ -19,6 +20,13 @@ Args:
 Returns:
     None
 """
+
+
+# this function returns the max argument from a probability distribution
+def greedy_decoding(logits: torch.Tensor) -> torch.Tensor:
+    logger.info("Using greedy decoding")
+    prob: torch.Tensor = torch.softmax(logits, dim=-1)
+    return torch.argmax(prob, dim=-1, keepdim=True)
 
 
 class TextGenerator():
@@ -89,7 +97,7 @@ class TextGenerator():
             self,
             input: torch.Tensor,
             max_new_tokens: int,
-            decode_strategy
+            decode_strategy: AbstractDecodeStrategy
             ) -> torch.Tensor:
         '''
         This method generates max_new_tokens drawn from the model
@@ -108,13 +116,9 @@ class TextGenerator():
                 logits: torch.Tensor = self.model(input_trimmed)
 
             logits = logits[:, -1, :]
-            # prob: torch.Tensor = torch.softmax(logits, dim=-1)
+            logits: torch.Tensor = torch.softmax(logits, dim=-1)
 
-            # #decodes strategy
-            # next_token: torch.Tensor = torch.argmax(prob, dim=-1, keepdim=True)
-            # next_token: torch.Tensor = torch.multinomial(prob, num_samples=1).item()
-            next_token: torch.Tensor = decode_strategy(logits)
-
+            next_token: torch.Tensor = decode_strategy.decode(logits)
             input = torch.cat((input, next_token), dim=1)
 
         logger.debug(f"Text generated: {input}")
@@ -124,8 +128,8 @@ class TextGenerator():
     def generate_text(
             self,
             start_context: str,
-            decode_strategy
-        ) -> str:
+            decode_strategy: AbstractDecodeStrategy
+    ) -> str:
 
         # get the device it should run
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -137,7 +141,11 @@ class TextGenerator():
         )
 
         with torch.no_grad():
-            token_ids = self.to_text(encoded, max_new_tokens=50)
+            token_ids = self.to_text(
+                encoded,
+                max_new_tokens=50,
+                decode_strategy=decode_strategy
+            )
 
         decoded_text = self.token_ids_to_text(token_ids=token_ids)
 
@@ -146,18 +154,3 @@ class TextGenerator():
         logger.debug(f"New text: {decoded_text}")
 
         return decoded_text
-
-
-# this function returns the max argument from a probability distribution
-def greedy_decoding(logits: torch.Tensor) -> torch.Tensor:
-    prob: torch.Tensor = torch.softmax(logits, dim=-1)
-    return torch.argmax(prob, dim=-1, keepdim=True)
-
-
-# this function returns one tensor sampled from a multinomial distribution
-def temperature_scaling(
-        logits: torch.Tensor,
-        temperature: float
-        ) -> torch.Tensor:
-    scaled_logits: torch.Tensor = logits / temperature
-    return torch.multinomial(scaled_logits, num_samples=1).item()

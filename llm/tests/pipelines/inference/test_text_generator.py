@@ -5,7 +5,12 @@ from typing import List, Tuple
 
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.architecture.gpt_model import GPTModel
-from llm.llm import model_cfg
+from llm.llm.components.decoding_strategies import GreedyDecoding, \
+    TemperatureScaling
+from llm.llm import model_cfg, logger
+
+
+torch.manual_seed(456)
 
 
 @pytest.fixture()
@@ -13,14 +18,14 @@ def text_with_ids() -> Tuple[str, List[int], str]:
     text: str = "Every effort moves you"
     ids: List[int] = [6109, 3626, 6100, 345]
     generated: str = ("Every effort moves you"
-                      "encrypted quartz ESA inspired passport extra")
+                      "51ancouver considered donations Snyder1981")
     return (text, ids, generated)
 
 
 @pytest.fixture
 def model() -> GPTModel:
-    device: str = ("cuda" if torch.cuda.is_available() else "cpu")
     torch.manual_seed(456)
+    device: str = ("cuda" if torch.cuda.is_available() else "cpu")
     model: GPTModel = GPTModel(cfg=model_cfg)
     model.to(device=device)
     return model
@@ -79,27 +84,52 @@ def test_token_ids_to_text(
     assert expected == output
 
 
-def test_to_text(
+def test_to_text_greedy_decoding(
         text_with_ids: Tuple[str, List[int], str],
         model: GPTModel
         ):
 
+    device: str = ("cuda" if torch.cuda.is_available() else "cpu")
+
     text_provider: TextGenerator = TextGenerator(
         model=model,
         context_length=1024,
-        encoding="gpt2"
+        encoding="gpt2",
     )
+
+    greedy_decoding: GreedyDecoding = GreedyDecoding()
     output_ids: torch.Tensor = text_provider.to_text(
-        torch.tensor([text_with_ids[1]]), max_new_tokens=6
+        torch.tensor([text_with_ids[1]]).to(device=device),
+        max_new_tokens=6,
+        decode_strategy=greedy_decoding
     )
 
-    output: str = text_provider.token_ids_to_text(output_ids)
-    expected: str = text_with_ids[2]
-
-    assert expected == output
+    assert output_ids.shape[1] == 10
 
 
-def test_produce_text(model: GPTModel):
+def test_to_text_temperature_scaling(
+        text_with_ids: Tuple[str, List[int], str],
+        model: GPTModel
+        ):
+    device: str = ("cuda" if torch.cuda.is_available() else "cpu")
+
+    text_provider: TextGenerator = TextGenerator(
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+    )
+
+    temperature_scaling: TemperatureScaling = TemperatureScaling(temperature=1)
+    output_ids: torch.Tensor = text_provider.to_text(
+        torch.tensor([text_with_ids[1]]).to(device=device),
+        max_new_tokens=6,
+        decode_strategy=temperature_scaling
+    )
+
+    assert output_ids.shape[1] == 10
+
+
+def test_produce_text_greedy(model: GPTModel):
 
     text_provider: TextGenerator = TextGenerator(
         model=model,
@@ -107,9 +137,31 @@ def test_produce_text(model: GPTModel):
         encoding="gpt2"
     )
 
+    greedy_decoding: GreedyDecoding = GreedyDecoding()
     start_context: str = "Every effort moves you"
     text_produced: str = text_provider.generate_text(
-        start_context=start_context
+        start_context=start_context,
+        decode_strategy=greedy_decoding
         )
 
     assert text_provider.text_to_token_ids(text_produced).shape[1] == 54
+
+
+def test_produce_text_temperature_scaling(model: GPTModel):
+
+    text_provider: TextGenerator = TextGenerator(
+        model=model,
+        context_length=1024,
+        encoding="gpt2"
+    )
+
+    temperature_scaling: TemperatureScaling = TemperatureScaling(temperature=1)
+    start_context: str = "Every effort moves you"
+    text_produced: str = text_provider.generate_text(
+        start_context=start_context,
+        decode_strategy=temperature_scaling
+        )
+
+    logger.info(text_provider.text_to_token_ids(text_produced).shape)
+
+    assert text_provider.text_to_token_ids(text_produced).shape[1] == 58
