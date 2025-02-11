@@ -13,6 +13,7 @@ from llm.llm.architecture.gpt_model import GPTModel
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.early_stop import EarlyStop
+from llm.llm.components.decoding_strategies import TemperatureScaling
 
 """
 This Trainer class is responsible for thr whole training pipeline
@@ -185,8 +186,11 @@ class Trainer():
                     elapsed.seconds))}"
                 )
 
+            temperature_scaling: TemperatureScaling = TemperatureScaling(
+                temperature=1.0)
             text_generated: str = self.text_generator.generate_text(
-                start_context=start_context
+                start_context=start_context,
+                decode_strategy=temperature_scaling
             )
 
             # Update texts generated
