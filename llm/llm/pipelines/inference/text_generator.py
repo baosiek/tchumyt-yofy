@@ -16,6 +16,8 @@ Args:
     context_length: int -> The context_length that trims or
         pad incoming text length
     encoding: str -> The encoding to initialize the TikToken tokenizer
+    decode_strategy: AbstractDecodeStrategy -> The decode strategy like,
+        greedy decoding or top K sampling
 
 Returns:
     None
@@ -34,7 +36,8 @@ class TextGenerator():
             self,
             model: GPTModel,
             context_length: int,
-            encoding: str
+            encoding: str,
+            decode_strategy: AbstractDecodeStrategy
             ):
 
         # The model to generate text
@@ -45,6 +48,9 @@ class TextGenerator():
 
         # The context length
         self.context_length: int = context_length
+
+        # The decoder strategy
+        self.decode_strategy: AbstractDecodeStrategy = decode_strategy
 
         logger.debug(f"Text generator initialized. "
                      f"Context length: {context_length} "
@@ -97,7 +103,6 @@ class TextGenerator():
             self,
             input: torch.Tensor,
             max_new_tokens: int,
-            decode_strategy: AbstractDecodeStrategy
             ) -> torch.Tensor:
         '''
         This method generates max_new_tokens drawn from the model
@@ -118,7 +123,7 @@ class TextGenerator():
             logits = logits[:, -1, :]
             logits: torch.Tensor = torch.softmax(logits, dim=-1)
 
-            next_token: torch.Tensor = decode_strategy.decode(logits)
+            next_token: torch.Tensor = self.decode_strategy.decode(logits)
             input = torch.cat((input, next_token), dim=1)
 
         logger.debug(f"Text generated: {input}")
@@ -127,8 +132,7 @@ class TextGenerator():
 
     def generate_text(
             self,
-            start_context: str,
-            decode_strategy: AbstractDecodeStrategy
+            start_context: str
     ) -> str:
 
         # get the device it should run
@@ -144,7 +148,7 @@ class TextGenerator():
             token_ids = self.to_text(
                 encoded,
                 max_new_tokens=50,
-                decode_strategy=decode_strategy
+                # decode_strategy=self.decode_strategy
             )
 
         decoded_text = self.token_ids_to_text(token_ids=token_ids)
