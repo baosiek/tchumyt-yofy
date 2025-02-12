@@ -16,6 +16,7 @@ class GreedyDecoding(AbstractDecodeStrategy):
             self,
     ):
         super().__init__()
+        self.__name__: str = "greedy_decoding"
 
     def decode(self, logits: torch.Tensor) -> torch.Tensor:
         return torch.argmax(logits, dim=-1, keepdim=True)
@@ -30,6 +31,7 @@ class TemperatureScaling(AbstractDecodeStrategy):
         super().__init__()
         self.temperature: float = temperature
         self.num_samples: int = num_samples
+        self.__name__: str= "temperature_scaling"
 
     def decode(self, logits: torch.Tensor) -> torch.Tensor:
         scaled_logits: torch.Tensor = logits / torch.tensor(self.temperature,
@@ -52,6 +54,7 @@ class TopKScaling(AbstractDecodeStrategy):
         self.top_k: int = topk_k
         self.temperature: float = temperature
         self.num_samples: int = num_samples
+        self.__name__: str = "top_k_sampling"
 
     def decode(self, logits: torch.Tensor) -> torch.Tensor:
 
