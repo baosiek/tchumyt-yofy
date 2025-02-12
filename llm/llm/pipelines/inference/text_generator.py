@@ -52,9 +52,9 @@ class TextGenerator():
         # The decoder strategy
         self.decode_strategy: AbstractDecodeStrategy = decode_strategy
 
-        logger.debug(f"Text generator initialized. "
-                     f"Context length: {context_length} "
-                     f"- Tokenizer encoding: {encoding}")
+        logger.info("Text generator initialized with:")
+        logger.info(f"\tTokenizer encoding: {encoding}")
+        logger.info(f"\tDecode strategy: {str(decode_strategy.__name__)}")
 
     def text_to_token_ids(self, text: str) -> torch.Tensor:
         '''

@@ -31,7 +31,7 @@ class TemperatureScaling(AbstractDecodeStrategy):
         super().__init__()
         self.temperature: float = temperature
         self.num_samples: int = num_samples
-        self.__name__: str= "temperature_scaling"
+        self.__name__: str = "temperature_scaling"
 
     def decode(self, logits: torch.Tensor) -> torch.Tensor:
         scaled_logits: torch.Tensor = logits / torch.tensor(self.temperature,

@@ -14,7 +14,7 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
 from llm.llm.pipelines.train.trainer import Trainer
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
-    TemperatureScaling
+    TopKScaling
 
 from llm.llm import model_cfg, trainer_cfg, logger
 
@@ -59,8 +59,8 @@ def mock_data() -> List[Dict[str, Any]]:
 
 @pytest.fixture
 def decode_strategy() -> AbstractDecodeStrategy:
-    temperature_scaling: TemperatureScaling = TemperatureScaling(1.0)
-    return temperature_scaling
+    decode_strategy: TopKScaling = TopKScaling(topk_k=3, temperature=0.5)
+    return decode_strategy
 
 
 @pytest.fixture
