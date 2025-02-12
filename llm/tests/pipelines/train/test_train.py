@@ -13,6 +13,8 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
      create_crawl_dataset_loader
 from llm.llm.pipelines.train.trainer import Trainer
 from llm.llm.pipelines.inference.text_generator import TextGenerator
+from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
+    TemperatureScaling
 
 from llm.llm import model_cfg, trainer_cfg, logger
 
@@ -53,6 +55,12 @@ def mock_data() -> List[Dict[str, Any]]:
     with open("llm/resources/testing.json", 'r') as file:
         mock_data = json.load(file)
         return mock_data
+
+
+@pytest.fixture
+def decode_strategy() -> AbstractDecodeStrategy:
+    temperature_scaling: TemperatureScaling = TemperatureScaling(1.0)
+    return temperature_scaling
 
 
 @pytest.fixture
@@ -108,12 +116,16 @@ def loaders(mock_data, mocker) -> Tuple[DataLoader, DataLoader]:
 def test_trainer_initialization(
         start_context: str,
         model: GPTModel,
-        loaders
+        decode_strategy
+
         ) -> None:
 
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     text_generator: TextGenerator = TextGenerator(
-        model=model, context_length=1024, encoding="gpt2"
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+        decode_strategy=decode_strategy
     )
 
     trainer: Trainer = Trainer(
@@ -134,7 +146,8 @@ def test_trainer_initialization(
 def test_trainer_train_method_no_early_stop(
           start_context: str,
           loaders: Tuple[DataLoader, DataLoader],
-          model: GPTModel
+          model: GPTModel,
+          decode_strategy: AbstractDecodeStrategy
         ) -> None:
 
     device: str = torch.device(
@@ -142,7 +155,10 @@ def test_trainer_train_method_no_early_stop(
              )
 
     text_generator: TextGenerator = TextGenerator(
-        model=model, context_length=1024, encoding="gpt2"
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+        decode_strategy=decode_strategy
     )
 
     trainer: Trainer = Trainer(
@@ -167,6 +183,7 @@ def test_trainer_train_method_early_stopping(
           loaders: Tuple[DataLoader, DataLoader],
           model: GPTModel,
           mock_cfg_data: Dict[str, Any],
+          decode_strategy: AbstractDecodeStrategy,
           mocker
         ) -> None:
 
@@ -175,7 +192,10 @@ def test_trainer_train_method_early_stopping(
              )
 
     text_generator: TextGenerator = TextGenerator(
-        model=model, context_length=1024, encoding="gpt2"
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+        decode_strategy=decode_strategy
     )
 
     trainer: Trainer = Trainer(
