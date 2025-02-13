@@ -32,7 +32,7 @@ def mock_cfg_data() -> Dict[str, Any]:
         "batch_size": 8,
         "lr_rate": 0.0004,
         "weight_decay": 0.1,
-        "num_epochs": 5,
+        "num_epochs": 2,
         "eval_freq": 100,
         "temperature": 0.1,
         "eval_iter": 100,
@@ -59,7 +59,7 @@ def mock_data() -> List[Dict[str, Any]]:
 
 @pytest.fixture
 def decode_strategy() -> AbstractDecodeStrategy:
-    decode_strategy: TopKScaling = TopKScaling(topk_k=3, temperature=0.5)
+    decode_strategy: TopKScaling = TopKScaling(temperature=0.5, topk_k=3)
     return decode_strategy
 
 
@@ -147,7 +147,8 @@ def test_trainer_train_method_no_early_stop(
           start_context: str,
           loaders: Tuple[DataLoader, DataLoader],
           model: GPTModel,
-          decode_strategy: AbstractDecodeStrategy
+          decode_strategy: AbstractDecodeStrategy,
+          mock_cfg_data: Dict[str, Any],
         ) -> None:
 
     device: str = torch.device(
@@ -164,7 +165,7 @@ def test_trainer_train_method_no_early_stop(
     trainer: Trainer = Trainer(
         model=model,
         text_generator=text_generator,
-        trainer_cfg=trainer_cfg,
+        trainer_cfg=mock_cfg_data,
         device=device
     )
 
@@ -175,7 +176,7 @@ def test_trainer_train_method_no_early_stop(
             start_context
         )
 
-    assert len(texts_generated) == trainer_cfg["num_epochs"]
+    assert len(texts_generated) == mock_cfg_data["num_epochs"]
 
 
 def test_trainer_train_method_early_stopping(
