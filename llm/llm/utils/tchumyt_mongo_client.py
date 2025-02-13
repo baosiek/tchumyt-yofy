@@ -37,3 +37,9 @@ class TchumytMongoClient():
             return self.collection.find()
         else:
             return self.collection.find(query)
+
+    def query_with_limit(self, query: str = None, limit: int = 1000) -> Cursor:
+        if query is None:
+            return self.collection.find().limit(limit=limit)
+        else:
+            return self.collection.find(query).limit(limit=limit)

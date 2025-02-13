@@ -13,6 +13,8 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
      create_crawl_dataset_loader
 from llm.llm.pipelines.train.trainer import Trainer
 from llm.llm.pipelines.inference.text_generator import TextGenerator
+from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
+    TopKScaling
 
 from llm.llm import model_cfg, trainer_cfg, logger
 
@@ -20,6 +22,26 @@ from llm.llm import model_cfg, trainer_cfg, logger
 @pytest.fixture()
 def start_context() -> str:
     return "Trump is the president"
+
+
+@pytest.fixture()
+def mock_cfg_data() -> Dict[str, Any]:
+
+    mock_cfg_data: Dict[str, Any] = {
+        "name": "Trainer for GPTModel",
+        "batch_size": 8,
+        "lr_rate": 0.0004,
+        "weight_decay": 0.1,
+        "num_epochs": 2,
+        "eval_freq": 100,
+        "temperature": 0.1,
+        "eval_iter": 100,
+        "context_length": 1024,
+        "patience": 2,
+        "delta": 1.0000,
+        "tiktoken_encoding": "gpt2"
+    }
+    return mock_cfg_data
 
 
 @pytest.fixture()
@@ -33,6 +55,12 @@ def mock_data() -> List[Dict[str, Any]]:
     with open("llm/resources/testing.json", 'r') as file:
         mock_data = json.load(file)
         return mock_data
+
+
+@pytest.fixture
+def decode_strategy() -> AbstractDecodeStrategy:
+    decode_strategy: TopKScaling = TopKScaling(temperature=0.5, topk_k=3)
+    return decode_strategy
 
 
 @pytest.fixture
@@ -88,12 +116,16 @@ def loaders(mock_data, mocker) -> Tuple[DataLoader, DataLoader]:
 def test_trainer_initialization(
         start_context: str,
         model: GPTModel,
-        loaders
+        decode_strategy
+
         ) -> None:
 
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     text_generator: TextGenerator = TextGenerator(
-        model=model, context_length=1024, encoding="gpt2"
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+        decode_strategy=decode_strategy
     )
 
     trainer: Trainer = Trainer(
@@ -111,10 +143,12 @@ def test_trainer_initialization(
     )
 
 
-def test_trainer_train_method(
+def test_trainer_train_method_no_early_stop(
           start_context: str,
           loaders: Tuple[DataLoader, DataLoader],
-          model: GPTModel
+          model: GPTModel,
+          decode_strategy: AbstractDecodeStrategy,
+          mock_cfg_data: Dict[str, Any],
         ) -> None:
 
     device: str = torch.device(
@@ -122,13 +156,16 @@ def test_trainer_train_method(
              )
 
     text_generator: TextGenerator = TextGenerator(
-        model=model, context_length=1024, encoding="gpt2"
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+        decode_strategy=decode_strategy
     )
 
     trainer: Trainer = Trainer(
         model=model,
         text_generator=text_generator,
-        trainer_cfg=trainer_cfg,
+        trainer_cfg=mock_cfg_data,
         device=device
     )
 
@@ -139,4 +176,42 @@ def test_trainer_train_method(
             start_context
         )
 
-    assert len(texts_generated) == trainer_cfg["num_epochs"]
+    assert len(texts_generated) == mock_cfg_data["num_epochs"]
+
+
+def test_trainer_train_method_early_stopping(
+          start_context: str,
+          loaders: Tuple[DataLoader, DataLoader],
+          model: GPTModel,
+          mock_cfg_data: Dict[str, Any],
+          decode_strategy: AbstractDecodeStrategy,
+          mocker
+        ) -> None:
+
+    device: str = torch.device(
+             "cuda" if torch.cuda.is_available() else "cpu"
+             )
+
+    text_generator: TextGenerator = TextGenerator(
+        model=model,
+        context_length=1024,
+        encoding="gpt2",
+        decode_strategy=decode_strategy
+    )
+
+    trainer: Trainer = Trainer(
+        model=model,
+        text_generator=text_generator,
+        trainer_cfg=mock_cfg_data,
+        device=device,
+        early_stopping=True
+    )
+
+    _, _, _, texts_generated = \
+        trainer.train(
+            loaders[0],
+            loaders[1],
+            start_context
+        )
+
+    assert trainer.early_stop.early_stop is True

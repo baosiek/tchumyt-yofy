@@ -2,9 +2,12 @@ name: Trainer for GPTModel
 batch_size: 8
 lr_rate: 0.0004
 weight_decay: 0.1
-num_epochs: 2
+num_epochs: 50
 eval_freq: 100
-temperature: 0.1
-eval_iter: 36
+temperature: 0.5
+eval_iter: 
 context_length: 1024
+patience: 3
+delta: 0.0001
+top_k: 3
 tiktoken_encoding: "gpt2"
