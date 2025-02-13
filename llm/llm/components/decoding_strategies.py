@@ -59,10 +59,10 @@ class TopKScaling(AbstractDecodeStrategy):
     def decode(self, logits: torch.Tensor) -> torch.Tensor:
 
         # Ranks the logits, returning the top k in descending order
-        top_logits, _ = torch.topk(logits, self.top_k)
+        top_logits, top_pos = torch.topk(logits, self.top_k)
 
         # The lowest value is the last one
-        lowest_logit: torch.Tensor = top_logits[-1]
+        lowest_logit: torch.Tensor = top_logits[0, -1]
 
         # New_logits is logits with only the top 3 values. The other
         # logits are set to -inf.
@@ -73,14 +73,14 @@ class TopKScaling(AbstractDecodeStrategy):
         )
 
         # The new probability distribution
-        logits = torch.softmax(new_logits, dim=0)
+        new_logits = torch.softmax(new_logits, dim=0)
 
         # Scales the probabilities
-        logits = logits / self.temperature
+        scaled_logits: torch.Tensor = logits / self.temperature
 
-        # Turn scaled values int a probability distribution
-        logits = torch.softmax(logits, dim=-1)
+        # Turn scaled values into a probability distribution
+        probabilities: torch.Tensor = torch.softmax(scaled_logits, dim=-1)
 
         # Draws the next token from a multinomial distribution and
-        # returns the next token
-        return torch.multinomial(logits, num_samples=1)
+        # returns it
+        return torch.multinomial(probabilities, num_samples=1)
