@@ -19,7 +19,7 @@ if __name__ == "__main__":
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
     client: TchumytMongoClient = TchumytMongoClient(
-        "llm/configs/dataset_loader_config.yaml"
+        "llm/configs/dataset_loader_config.yaml",
     )
 
     # 1.2 Generator to enabling split dataset into train and validation subsets

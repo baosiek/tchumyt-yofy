@@ -6,19 +6,29 @@ from typing import List
 
 from llm.llm import logger
 from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.components.decoding_strategies import AbstractDecodeStrategy
 
 """
-This Trainer class is responsible for thr whole training pipeline
+This Trainer class is responsible for the whole training pipeline
 
 Args:
     model: GPTModel -> The initialized model to be trained
     context_length: int -> The context_length that trims or
         pad incoming text length
     encoding: str -> The encoding to initialize the TikToken tokenizer
+    decode_strategy: AbstractDecodeStrategy -> The decode strategy like,
+        greedy decoding or top K sampling
 
 Returns:
     None
 """
+
+
+# this function returns the max argument from a probability distribution
+def greedy_decoding(logits: torch.Tensor) -> torch.Tensor:
+    logger.info("Using greedy decoding")
+    prob: torch.Tensor = torch.softmax(logits, dim=-1)
+    return torch.argmax(prob, dim=-1, keepdim=True)
 
 
 class TextGenerator():
@@ -26,7 +36,8 @@ class TextGenerator():
             self,
             model: GPTModel,
             context_length: int,
-            encoding: str
+            encoding: str,
+            decode_strategy: AbstractDecodeStrategy
             ):
 
         # The model to generate text
@@ -38,9 +49,12 @@ class TextGenerator():
         # The context length
         self.context_length: int = context_length
 
-        logger.debug(f"Text genertor initialized. "
-                     f"Context length: {context_length} "
-                     f"- Tokenizer encoding: {encoding}")
+        # The decoder strategy
+        self.decode_strategy: AbstractDecodeStrategy = decode_strategy
+
+        logger.info("Text generator initialized with:")
+        logger.info(f"\tTokenizer encoding: {encoding}")
+        logger.info(f"\tDecode strategy: {str(decode_strategy.__name__)}")
 
     def text_to_token_ids(self, text: str) -> torch.Tensor:
         '''
@@ -88,7 +102,7 @@ class TextGenerator():
     def to_text(
             self,
             input: torch.Tensor,
-            max_new_tokens: int
+            max_new_tokens: int,
             ) -> torch.Tensor:
         '''
         This method generates max_new_tokens drawn from the model
@@ -107,18 +121,19 @@ class TextGenerator():
                 logits: torch.Tensor = self.model(input_trimmed)
 
             logits = logits[:, -1, :]
-            prob: torch.Tensor = torch.softmax(logits, dim=-1)
+            logits: torch.Tensor = torch.softmax(logits, dim=-1)
 
-            # greedy decoding
-            next_token: torch.Tensor = torch.argmax(prob, dim=-1, keepdim=True)
-
+            next_token: torch.Tensor = self.decode_strategy.decode(logits)
             input = torch.cat((input, next_token), dim=1)
 
         logger.debug(f"Text generated: {input}")
 
         return input
 
-    def generate_text(self, start_context: str) -> str:
+    def generate_text(
+            self,
+            start_context: str
+    ) -> str:
 
         # get the device it should run
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -130,7 +145,11 @@ class TextGenerator():
         )
 
         with torch.no_grad():
-            token_ids = self.to_text(encoded, max_new_tokens=50)
+            token_ids = self.to_text(
+                encoded,
+                max_new_tokens=50,
+                # decode_strategy=self.decode_strategy
+            )
 
         decoded_text = self.token_ids_to_text(token_ids=token_ids)
 

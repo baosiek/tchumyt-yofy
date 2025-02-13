@@ -4,14 +4,19 @@
         "bson",
         "endoftext",
         "GELU",
+        "gptmodel",
         "inferencer",
         "inferencing",
         "keepdim",
+        "multinomial",
         "pydantic",
         "tiktoken",
+        "torchinfo",
         "tril",
         "triu",
-        "yamls"
+        "xlabel",
+        "yamls",
+        "ylabel"
     ],
     "python.testing.unittestArgs": [
         "-v",
