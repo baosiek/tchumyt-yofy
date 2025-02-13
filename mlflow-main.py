@@ -16,6 +16,8 @@ from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.data_ingestion.data_loader import \
      create_crawl_dataset_loader
+from llm.llm.components.decoding_strategies import TopKScaling, \
+    AbstractDecodeStrategy
 
 
 def get_loaders() -> Tuple[DataLoader, DataLoader]:
@@ -76,11 +78,18 @@ def main():
     # Initialize model
     model: GPTModel = GPTModel(cfg=model_cfg)
 
+    # Sets the strategy for decoding
+    decode_strategy: AbstractDecodeStrategy = TopKScaling(
+        topk_k=trainer_cfg["top_k"],
+        temperature=trainer_cfg["temperature"]
+    )
+
     # Initializes text generator based with model initialized
     text_generator: TextGenerator = TextGenerator(
         model=model,
         context_length=trainer_cfg["context_length"],
-        encoding=trainer_cfg["tiktoken_encoding"]
+        encoding=trainer_cfg["tiktoken_encoding"],
+        decode_strategy=decode_strategy
     )
 
     # Initialize trainer
