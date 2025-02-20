@@ -9,6 +9,7 @@
         "inferencing",
         "keepdim",
         "multinomial",
+        "probas",
         "pydantic",
         "tiktoken",
         "torchinfo",
