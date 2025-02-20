@@ -131,7 +131,7 @@ class Trainer():
                 self.optimizer.zero_grad()
 
                 # computes the batch loss
-                loss: torch = self.evaluator.calculate_batch_loss(
+                loss: torch.Tensor = self.evaluator.calculate_batch_loss(
                     input_batch=input_batch, target_batch=target_batch
                 )
 
