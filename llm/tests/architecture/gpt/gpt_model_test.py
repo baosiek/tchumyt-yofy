@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from llm.llm import model_cfg
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 
 
 @pytest.fixture

@@ -8,7 +8,7 @@ from torch.utils.data.dataset import Subset
 
 from llm.llm import logger, model_cfg
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.pipelines.inference.text_inferencer import TextProvider
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset

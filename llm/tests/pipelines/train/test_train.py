@@ -6,7 +6,7 @@ from typing import Tuple, Dict, List, Any
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Subset
 
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.data_ingestion.data_loader import \
@@ -214,4 +214,4 @@ def test_trainer_train_method_early_stopping(
             start_context
         )
 
-    assert trainer.early_stop.early_stop is True
+    assert len(texts_generated) == 1

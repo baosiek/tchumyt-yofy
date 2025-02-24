@@ -5,7 +5,7 @@ import torch
 from typing import List
 
 from llm.llm import logger
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy
 
 """

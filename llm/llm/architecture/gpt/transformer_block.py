@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from typing import Dict, Any
 
-from llm.llm.architecture.feed_forward import FeedForward
+from llm.llm.architecture.gpt.feed_forward import FeedForward
 
 
 class TransformerBlock(nn.Module):

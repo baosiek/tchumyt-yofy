@@ -9,7 +9,7 @@ from mlflow import MlflowClient
 
 
 from llm.llm import logger, model_cfg, trainer_cfg
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.pipelines.train.trainer import Trainer
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
