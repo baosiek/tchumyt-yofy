@@ -4,8 +4,8 @@ import torch.nn as nn
 from typing import Any, Dict
 
 from llm.llm import logger
-from llm.llm.architecture.positional_encoding import PositionalEncoding
-from llm.llm.architecture.transformer_block import TransformerBlock
+from llm.llm.architecture.gpt.positional_encoding import PositionalEncoding
+from llm.llm.architecture.gpt.transformer_block import TransformerBlock
 
 
 class GPTModel(nn.Module):

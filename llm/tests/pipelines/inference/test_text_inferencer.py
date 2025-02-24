@@ -5,7 +5,7 @@ from typing import List, Tuple
 
 from llm.llm import model_cfg, logger
 from llm.llm.pipelines.inference.text_inferencer import TextProvider
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 
 
 @pytest.fixture()

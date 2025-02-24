@@ -9,7 +9,7 @@ from torch.optim import AdamW
 from typing import Any, Dict, List
 
 from llm.llm import logger
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.early_stop import EarlyStop
