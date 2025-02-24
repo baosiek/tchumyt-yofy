@@ -214,4 +214,4 @@ def test_trainer_train_method_early_stopping(
             start_context
         )
 
-    assert len(texts_generated) == 1
+    assert len(texts_generated) == mock_cfg_data["num_epochs"]
