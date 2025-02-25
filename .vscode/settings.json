@@ -8,16 +8,17 @@
         "inferencer",
         "inferencing",
         "keepdim",
+        "LSTM",
         "multinomial",
         "probas",
         "pydantic",
+        "randn",
         "tiktoken",
         "torchinfo",
         "tril",
         "triu",
         "xlabel",
         "yamls",
-        "randn",
         "ylabel"
     ],
     "python.testing.unittestArgs": [

@@ -6,12 +6,19 @@ import torch.nn as nn
 
 
 @pytest.fixture
-def rnn_model():
+def cfg():
+    return {
+        'vocabulary_size': 1000,
+        'embedding_dim': 128,
+        'context_length': 50,
+        'num_layers': 2
+    }
+
+
+@pytest.fixture
+def rnn_model(cfg):
     return RNNModelV1(
-        embedding_dim=128,
-        vocabulary_size=1000,
-        context_length=50,
-        num_layers=2,
+        cfg=cfg,
         device=torch.device("cpu")
     )
 

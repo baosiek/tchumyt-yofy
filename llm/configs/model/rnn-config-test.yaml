@@ -1,0 +1,5 @@
+name: LSTM
+vocabulary_size: 50257
+context_length: 50
+embedding_dim: 256
+num_layers: 4

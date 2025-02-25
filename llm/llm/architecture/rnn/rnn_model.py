@@ -1,9 +1,12 @@
 import torch
 import torch.nn as nn
 from llm.llm.architecture.rnn.lstm_model import LSTMText
+from llm.llm.architecture.abstract_model import AbstractModel
+
+from typing import Any, Dict
 
 
-class RNNModelV1(nn.Module):
+class RNNModelV1(AbstractModel):
     '''
     RNNModelV1 is a recurrent neural network model that uses LSTM layers for
     sequence modeling.
@@ -38,25 +41,10 @@ class RNNModelV1(nn.Module):
     '''
     def __init__(
         self,
-        embedding_dim: int,
-        # hidden_size: int,
-        vocabulary_size: int,
-        context_length: int,
-        # output_dim: int,
-        # out_features: int,
-        num_layers: int,
+        cfg: Dict[str, Any],
         device: torch.device = torch.device("cpu"),
     ):
-        super().__init__()
-
-        # The parameters
-        self.vocabulary_size: int = vocabulary_size
-        self.embedding_dim: int = embedding_dim
-        self.context_length: int = context_length
-        # self.output_dim: int = output_dim
-        # self.output_features: int = out_features
-        self.num_layers: int = num_layers
-        self.device: torch.device = device
+        super().__init__(cfg=cfg, device=device)
 
         # the embedding layer
         self.token_embedding_layer: nn.Embedding = nn.Embedding(
