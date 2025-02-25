@@ -94,8 +94,8 @@ class RNNModelV1(AbstractModel):
             torch.arange(self.context_length).to(device=self.device)
         )
 
-        print(f"Token embeddings shape: {token_embeddings_.shape}")
-        print(f"Pos embeddings shape: {pos_embeddings_.shape}")
+        # print(f"Token embeddings shape: {token_embeddings_.shape}")
+        # print(f"Pos embeddings shape: {pos_embeddings_.shape}")
         input_embeddings_ = token_embeddings_ + pos_embeddings_
 
         states = None
