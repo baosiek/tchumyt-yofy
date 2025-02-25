@@ -17,6 +17,7 @@
         "triu",
         "xlabel",
         "yamls",
+        "randn",
         "ylabel"
     ],
     "python.testing.unittestArgs": [
