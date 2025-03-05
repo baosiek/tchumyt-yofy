@@ -175,7 +175,7 @@ def test_trainer_train_method_no_early_stop(
 
     text_generator: TextGenerator = TextGenerator(
         model=model,
-        context_length=1024,
+        context_length=256,
         encoding="gpt2",
         decode_strategy=decode_strategy
     )
@@ -212,7 +212,7 @@ def test_trainer_train_method_early_stopping(
 
     text_generator: TextGenerator = TextGenerator(
         model=model,
-        context_length=1024,
+        context_length=256,
         encoding="gpt2",
         decode_strategy=decode_strategy
     )
