@@ -49,7 +49,7 @@ class RNNModelV1(AbstractModel):
         # the embedding layer
         self.token_embedding_layer: nn.Embedding = nn.Embedding(
             num_embeddings=self.vocabulary_size,
-            embedding_dim=self.embedding_dim
+            embedding_dim=self.embedding_dim,
         )
 
         self.pos_embedding_layer: nn.Embedding = nn.Embedding(
@@ -89,24 +89,22 @@ class RNNModelV1(AbstractModel):
         return repr
 
     def forward(self, X: torch.Tensor):
+        error_msg: str = f'''The model context length is {self.context_length}
+        while the input context length is {X.shape[1]}'''
+        assert X.shape[1] == self.context_length, error_msg
+
         token_embeddings_ = self.token_embedding_layer(X)
         pos_embeddings_ = self.pos_embedding_layer(
             torch.arange(self.context_length).to(device=self.device)
         )
 
-        # print(f"Token embeddings shape: {token_embeddings_.shape}")
-        # print(f"Pos embeddings shape: {pos_embeddings_.shape}")
+        # print(token_embeddings_.shape, pos_embeddings_.shape)
         input_embeddings_ = token_embeddings_ + pos_embeddings_
 
         states = None
         for rnn_layer in self.rnn_layers:
             output_, states = rnn_layer(input_embeddings_, states)
 
-        # print(f"Output from LSTM shape: {output_.shape}")
         output_ = self.output_layer(output_)
-        # print(f"Output RNN shape: {output_.shape}")
-
-        # output_ = torch.softmax(output_, dim=-1)
-        # output_ = torch.argmax(output_, dim=-1)
 
         return output_
