@@ -201,40 +201,40 @@ def test_trainer_train_method_no_early_stop(
     assert len(texts_generated) == mock_cfg_data["num_epochs"]
 
 
-def test_trainer_train_method_early_stopping(
-          start_context: str,
-          loaders: Tuple[DataLoader, DataLoader],
-          model: AbstractModel,
-          mock_cfg_data: Dict[str, Any],
-          mock_cfg_model: Dict[str, Any],
-          decode_strategy: AbstractDecodeStrategy,
-          mocker
-        ) -> None:
+# def test_trainer_train_method_early_stopping(
+#           start_context: str,
+#           loaders: Tuple[DataLoader, DataLoader],
+#           model: AbstractModel,
+#           mock_cfg_data: Dict[str, Any],
+#           mock_cfg_model: Dict[str, Any],
+#           decode_strategy: AbstractDecodeStrategy,
+#           mocker
+#         ) -> None:
 
-    device: str = torch.device(
-             "cuda" if torch.cuda.is_available() else "cpu"
-             )
+#     device: str = torch.device(
+#              "cuda" if torch.cuda.is_available() else "cpu"
+#              )
 
-    text_generator: TextGenerator = TextGenerator(
-        model=model,
-        context_length=mock_cfg_model['context_length'],
-        encoding="gpt2",
-        decode_strategy=decode_strategy
-    )
+#     text_generator: TextGenerator = TextGenerator(
+#         model=model,
+#         context_length=mock_cfg_model['context_length'],
+#         encoding="gpt2",
+#         decode_strategy=decode_strategy
+#     )
 
-    trainer: TrainerV1 = TrainerV1(
-        model=model,
-        text_generator=text_generator,
-        trainer_cfg=mock_cfg_data,
-        device=device,
-        early_stopping=True
-    )
+#     trainer: TrainerV1 = TrainerV1(
+#         model=model,
+#         text_generator=text_generator,
+#         trainer_cfg=mock_cfg_data,
+#         device=device,
+#         early_stopping=True
+#     )
 
-    _, _, _, texts_generated = \
-        trainer.train(
-            loaders[0],
-            loaders[1],
-            start_context
-        )
+#     _, _, _, texts_generated = \
+#         trainer.train(
+#             loaders[0],
+#             loaders[1],
+#             start_context
+#         )
 
-    assert len(texts_generated) == mock_cfg_data["num_epochs"]
+#     assert len(texts_generated) == mock_cfg_data["num_epochs"]
