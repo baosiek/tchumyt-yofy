@@ -16,7 +16,7 @@ from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
     TopKScaling
 
-from llm.llm import model_cfg, trainer_cfg, logger
+from llm.llm import logger, cfg
 
 
 @pytest.fixture()
@@ -46,7 +46,7 @@ def mock_cfg_data() -> Dict[str, Any]:
 
 @pytest.fixture()
 def model() -> GPTModel:
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
     return model
 
 

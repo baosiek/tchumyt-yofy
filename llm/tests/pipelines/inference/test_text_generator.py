@@ -7,7 +7,7 @@ from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.components.decoding_strategies import GreedyDecoding, \
     TemperatureScaling, AbstractDecodeStrategy
-from llm.llm import model_cfg, logger
+from llm.llm import cfg, logger
 
 
 @pytest.fixture()
@@ -23,13 +23,13 @@ def text_with_ids() -> Tuple[str, List[int], str]:
 def model() -> GPTModel:
     torch.manual_seed(456)
     device: str = ("cuda" if torch.cuda.is_available() else "cpu")
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
     model.to(device=device)
     return model
 
 
 def test_text_generated_initialized_correctly():
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
 
     decode_strategy: AbstractDecodeStrategy = GreedyDecoding()
     text_generator: TextGenerator = TextGenerator(

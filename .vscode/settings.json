@@ -9,6 +9,8 @@
         "inferencing",
         "keepdim",
         "LSTM",
+        "mlartifacts",
+        "mlruns",
         "multinomial",
         "probas",
         "pydantic",

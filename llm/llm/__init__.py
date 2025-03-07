@@ -138,9 +138,11 @@ def loads_configuration() -> Dict[str, Any]:
             {"name": "RNNModel", "type": "LSTM", "version": "1.0"}
         )
 
+        logger.info(f"Configuration loaded from MongoDB: {results['cfg']}")
+
         client.close()
 
-        return results
+        return results['cfg']
 
     except Exception as e:
         raise Exception(

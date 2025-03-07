@@ -1,4 +1,4 @@
-mongo_host: "172.232.177.221"
+mongo_host: "www.mongo.ca"
 mongo_port: "30018"
 dataset: "nlp_data"
 collection: "crawl_dataset"

@@ -1,20 +1,24 @@
 from torch import tensor
 from torch.utils.data import Dataset
-from typing import List
+from typing import List, Dict, Any
 
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
+from llm.llm import logger
 
 
 class CrawlDataset(Dataset):
     def __init__(
             self,
             client: TchumytMongoClient,
-            query: str = None,
+            query: Dict[str, Any] = None,
             limit: int = None
     ):
         super().__init__()
         self.client: TchumytMongoClient = client
+
+        logger.info(f"Querying DB: {query}")
         self.records: List[str] = list(client.query(query))
+        logger.info(f"Records retrieved: {len(self.records)}")
 
         if limit is None:
             self.records: List[str] = list(client.query(query))

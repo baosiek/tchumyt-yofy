@@ -13,11 +13,12 @@
         "lr_rate": 0.0001,
         "weight_decay": 0.1,
         "num_epochs": 2,
-        "eval_frequency": 1000,
+        "eval_freq": 1000,
         "eval_iter": 100,
         "temperature": 0.1,
         "patience": 3,
         "delta": 1.0,
-        "tiktoken_encodings": "gpt2"
+        "tiktoken_encoding": "gpt2",
+        "top_k": 3
     }
 }
