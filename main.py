@@ -12,7 +12,7 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.trainer import Trainer
 
-from llm.llm import logger, model_cfg, trainer_cfg
+from llm.llm import logger, cfg
 
 if __name__ == "__main__":
 
@@ -39,13 +39,13 @@ if __name__ == "__main__":
     # 1.5 Creates train and validation dataloaders
     train_loader: DataLoader = create_crawl_dataset_loader(
         crawl_dataset=train_dataset,
-        batch_size=trainer_cfg["batch_size"],
+        batch_size=cfg["batch_size"],
         shuffle=False
     )
 
     validation_loader: DataLoader = create_crawl_dataset_loader(
         crawl_dataset=validation_dataset,
-        batch_size=trainer_cfg["batch_size"],
+        batch_size=cfg["batch_size"],
         shuffle=False
     )
 
@@ -54,13 +54,13 @@ if __name__ == "__main__":
     logger.info(f"Validation loader length: {len(list(validation_loader))}")
 
     # 3. Initializes the model to be trained
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
 
     # 4. Initializes text generator based with model initialized
     text_generator: TextGenerator = TextGenerator(
         model=model,
-        context_length=trainer_cfg["context_length"],
-        encoding=trainer_cfg["tiktoken_encoding"]
+        context_length=cfg["context_length"],
+        encoding=cfg["tiktoken_encoding"]
     )
 
     # 5. Initializes the trainer
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     trainer: Trainer = Trainer(
         model=model,
         text_generator=text_generator,
-        trainer_cfg=trainer_cfg,
+        trainer_cfg=cfg,
         device=device
     )
 

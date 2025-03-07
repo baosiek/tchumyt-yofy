@@ -26,24 +26,14 @@ def start_context() -> str:
 
 
 @pytest.fixture()
-def mock_cfg_model() -> Dict[str, Any]:
+def mock_cfg() -> Dict[str, Any]:
 
-    mock_cfg_model: Dict[str, Any] = {
+    mock_cfg: Dict[str, Any] = {
         "name": "RNNModelV1",
         "vocabulary_size": 50257,
         "context_length": 256,
         "embedding_dim": 1024,
         "num_layers": 6,
-    }
-
-    return mock_cfg_model
-
-
-@pytest.fixture()
-def mock_cfg_data() -> Dict[str, Any]:
-
-    mock_cfg_data: Dict[str, Any] = {
-        "name": "Trainer for GPTModel",
         "batch_size": 8,
         "lr_rate": 0.0004,
         "weight_decay": 0.1,
@@ -51,18 +41,18 @@ def mock_cfg_data() -> Dict[str, Any]:
         "eval_freq": 100,
         "temperature": 0.1,
         "eval_iter": 100,
-        "context_length": 256,
         "patience": 2,
         "delta": 1.0000,
         "tiktoken_encoding": "gpt2"
     }
-    return mock_cfg_data
+
+    return mock_cfg
 
 
 @pytest.fixture()
-def model(mock_cfg_model: Dict[str, Any]) -> AbstractModel:
+def model(mock_cfg: Dict[str, Any]) -> AbstractModel:
     model: AbstractModel = RNNModelV1(
-        cfg=mock_cfg_model,
+        cfg=mock_cfg,
         device="cuda" if torch.cuda.is_available() else "cpu"
     )
     return model.to(device="cuda" if torch.cuda.is_available() else "cpu")
@@ -84,7 +74,7 @@ def decode_strategy() -> AbstractDecodeStrategy:
 
 @pytest.fixture
 def loaders(mock_data,
-            mock_cfg_data: Dict[str, Any],
+            mock_cfg: Dict[str, Any],
             mocker
             ) -> Tuple[DataLoader, DataLoader]:
 
@@ -119,13 +109,13 @@ def loaders(mock_data,
 
     train_loader: DataLoader = create_crawl_dataset_loader(
         crawl_dataset=train_dataset,
-        batch_size=mock_cfg_data["batch_size"],
+        batch_size=mock_cfg["batch_size"],
         shuffle=False
     )
 
     validation_loader: DataLoader = create_crawl_dataset_loader(
         crawl_dataset=validation_dataset,
-        batch_size=mock_cfg_data["batch_size"],
+        batch_size=mock_cfg["batch_size"],
         shuffle=False
     )
 
@@ -169,8 +159,7 @@ def test_trainer_train_method_no_early_stop(
           loaders: Tuple[DataLoader, DataLoader],
           model: AbstractModel,
           decode_strategy: AbstractDecodeStrategy,
-          mock_cfg_data: Dict[str, Any],
-          mock_cfg_model: Dict[str, Any],
+          mock_cfg: Dict[str, Any],
         ) -> None:
 
     device: str = torch.device(
@@ -179,7 +168,7 @@ def test_trainer_train_method_no_early_stop(
 
     text_generator: TextGenerator = TextGenerator(
         model=model,
-        context_length=mock_cfg_model['context_length'],
+        context_length=mock_cfg['context_length'],
         encoding="gpt2",
         decode_strategy=decode_strategy
     )
@@ -187,7 +176,7 @@ def test_trainer_train_method_no_early_stop(
     trainer: TrainerV1 = TrainerV1(
         model=model,
         text_generator=text_generator,
-        trainer_cfg=mock_cfg_data,
+        trainer_cfg=mock_cfg,
         device=device
     )
 
@@ -198,8 +187,7 @@ def test_trainer_train_method_no_early_stop(
             start_context
         )
 
-    assert len(texts_generated) == mock_cfg_data["num_epochs"]
-
+    assert len(texts_generated) == mock_cfg["num_epochs"]
 
 # def test_trainer_train_method_early_stopping(
 #           start_context: str,
