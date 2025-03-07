@@ -6,7 +6,7 @@ from typing import Tuple, List, Dict, Any
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Subset
 
-from llm.llm import logger, model_cfg
+from llm.llm import logger, cfg
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.pipelines.inference.text_inferencer import TextProvider
@@ -67,7 +67,7 @@ def loaders(mocker, mock_data) -> Tuple[DataLoader, DataLoader]:
 
 @pytest.fixture
 def model() -> GPTModel:
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
     return model
 
 
@@ -84,7 +84,7 @@ def in_an_out_cpu() -> \
 
     device: str = "cpu"
 
-    text_provider: TextProvider = TextProvider(cfg=model_cfg)
+    text_provider: TextProvider = TextProvider(cfg=cfg)
 
     inputs: torch.Tensor = torch.tensor([], dtype=int)
     targets: torch.Tensor = torch.tensor([], dtype=int)
@@ -147,7 +147,7 @@ def test_calculate_batch_loss_with_gpu(
     logger.debug(f"Input: {in_an_out_gpu[0]}")
     logger.debug(f"Target: {in_an_out_gpu[1]}")
 
-    model = GPTModel(cfg=model_cfg)
+    model = GPTModel(cfg=cfg)
 
     evaluator: Evaluator = Evaluator(model, device=in_an_out_gpu[3])
 

@@ -17,7 +17,7 @@ from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
     TopKScaling
 
-from llm.llm import trainer_cfg, logger
+from llm.llm import logger
 
 
 @pytest.fixture()

@@ -170,3 +170,7 @@ cython_debug/
 # Book directory
 notebooks/rnns/books/
 
+# mlflow directories
+mlruns/
+mlartifacts/
+

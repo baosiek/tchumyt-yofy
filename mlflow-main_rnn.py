@@ -16,13 +16,12 @@ from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.data_ingestion.data_loader import \
-     create_crawl_dataset_loader
+    create_crawl_dataset_loader
 from llm.llm.components.decoding_strategies import TopKScaling, \
-    AbstractDecodeStrategy
+      AbstractDecodeStrategy
 
 
-def get_loaders() -> Tuple[DataLoader, DataLoader]:
-
+def get_loaders(query: Dict[str, Any] = None) -> Tuple[DataLoader, DataLoader]:
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
     client: TchumytMongoClient = TchumytMongoClient(
@@ -34,14 +33,17 @@ def get_loaders() -> Tuple[DataLoader, DataLoader]:
 
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client),
+        CrawlDataset(client=client, limit=2000, query=query),
         [0.9, 0.1],
-        generator=generator1
+        generator=generator1,
     )
 
     # 1.4 Assigns train and validation datasets accordingly
     train_dataset: Subset = datasets[0]
     validation_dataset: Subset = datasets[1]
+
+    # logger.info(f"Configuration cfg type: {cfg.keys()}")
+    # logger.info(f"vocabulary_size: {cfg['vocabulary_size']}")
 
     # 1.5 Creates train and validation dataloaders
     train_loader: DataLoader = create_crawl_dataset_loader(
@@ -64,28 +66,24 @@ def get_loaders() -> Tuple[DataLoader, DataLoader]:
 
 
 def main():
-
     # Set the device on which the model will be trained
-    device: str = torch.device(
-        "cuda" if torch.cuda.is_available() else "cpu"
-    )
+    device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Get loaders
-    train_loader, validation_loader = get_loaders()
+    query: Dict[str, Any] = None
+    train_loader, validation_loader = get_loaders(query=query)
 
     # Start context
     start_context: str = "Trump is the president of the United"
 
     # Initialize model
     model: AbstractModel = RNNModelV1(
-        cfg=cfg,
-        device="cuda" if torch.cuda.is_available() else "cpu"
+        cfg=cfg, device="cuda" if torch.cuda.is_available() else "cpu"
     )
 
     # Sets the strategy for decoding
     decode_strategy: AbstractDecodeStrategy = TopKScaling(
-        topk_k=cfg["top_k"],
-        temperature=cfg["temperature"]
+        topk_k=cfg["top_k"], temperature=cfg["temperature"]
     )
 
     # Initializes text generator based with model initialized
@@ -93,7 +91,7 @@ def main():
         model=model,
         context_length=cfg["context_length"],
         encoding=cfg["tiktoken_encoding"],
-        decode_strategy=decode_strategy
+        decode_strategy=decode_strategy,
     )
 
     # Initialize trainer
@@ -105,7 +103,6 @@ def main():
     )
 
     with mlflow.start_run(run_name=run_name):
-
         mlflow.enable_system_metrics_logging()
 
         # Logs training parameters
@@ -117,33 +114,34 @@ def main():
 
         mlflow.log_artifact("llm/reports/model_summary.txt")
 
-        train_losses, validation_losses, \
-            track_tokens_seen, _ = trainer.train(
-                train_loader=train_loader,
-                validation_loader=validation_loader,
-                start_context=start_context
-            )
+        train_losses, validation_losses, track_tokens_seen, _ = trainer.train(
+            train_loader=train_loader,
+            validation_loader=validation_loader,
+            start_context=start_context,
+        )
 
         # Initialize metrics
         metrics: Dict[str, Any] = {
             "train_loss": train_losses[-1],
             "validation_loss": validation_losses[-1],
-            "track_tokens_seen": track_tokens_seen[-1]
+            "track_tokens_seen": track_tokens_seen[-1],
         }
 
         # Log metrics that were calculated during training
         mlflow.log_metrics(metrics)
 
-        metadata = {"description": "this is a test",
-                    "Description": "This is also a test"}
+        metadata = {
+            "description": "this is a test",
+            "Description": "This is also a test",
+        }
 
         # Logs the model
         mlflow.pytorch.log_model(
             model,
             artifact_path=artifact_path,
             registered_model_name="gpt_model_politics",
-            metadata=metadata
-            )
+            metadata=metadata,
+        )
 
         # Saves the training log
         mlflow.log_artifacts("llm/logs/project.log")
@@ -153,7 +151,6 @@ def main():
 
 
 if __name__ == "__main__":
-
     # Use the fluent API to set the tracking uri and the active experiment
     mlflow.set_tracking_uri("http://127.0.0.1:5000")
 
@@ -166,23 +163,20 @@ if __name__ == "__main__":
     run_name = "politics_gptmodel_test"
 
     # Define an artifact path that the model will be saved to.
-    artifact_path = \
-        "mlflow-artifacts:/585006454050763634/model/politics_rnn_model"
+    artifact_path = "mlflow-artifacts:/585006454050763634/model/politics_rnn_model"
 
     main()
 
     client = MlflowClient(mlflow.get_tracking_uri())
-    model_info = client.get_latest_versions('rnn_model_politics')[0]
+    model_info = client.get_latest_versions("rnn_model_politics")[0]
     client.set_registered_model_alias(
-        "rnn_model_politics",
-        "challenger",
-        model_info.version
+        "rnn_model_politics", "challenger", model_info.version
     )
     client.set_model_version_tag(
-        name='rnn_model_politics',
+        name="rnn_model_politics",
         version=model_info.version,
-        key='nlp',
-        value='text_generation'
+        key="nlp",
+        value="text_generation",
     )
 
     logger.info("The End!")
