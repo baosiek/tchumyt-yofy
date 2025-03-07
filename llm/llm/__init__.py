@@ -6,6 +6,7 @@ import json
 import yaml
 
 from typing import Dict, Any
+from pymongo import MongoClient
 
 
 def initialize_logger(log_dir: str) -> logging.Logger:
@@ -123,15 +124,42 @@ def loads_trainer_configuration(config_dir: str) -> Dict[str, Any]:
     return cfg
 
 
+def loads_configuration() -> Dict[str, Any]:
+    '''
+    This function loads the configuration file from MongoDB
+    '''
+    try:
+        uri = "mongodb://baosiek:123456@www.mongo.ca:30018"
+        client = MongoClient(uri)
+        database = client["configs"]
+        collection = database["models"]
+
+        results = collection.find_one(
+            {"name": "RNNModel", "type": "LSTM", "version": "1.0"}
+        )
+
+        client.close()
+
+        return results
+
+    except Exception as e:
+        raise Exception(
+            f"Error while loading configuration from MongoDB: {e}"
+        )
+
+
 # Initializes the logger
 logger: logging.Logger = initialize_logger("llm/configs/logger")
 
-# Loads trainer configuration
-trainer_cfg: Dict[str, Any] = loads_trainer_configuration(
-    "llm/configs/trainer"
-)
+# # Loads trainer configuration
+# trainer_cfg: Dict[str, Any] = loads_trainer_configuration(
+#     "llm/configs/trainer"
+# )
 
-# Loads model configuration
-model_cfg: Dict[str, Any] = loads_model_configuration(
-    "llm/configs/model"
-)
+# # Loads model configuration
+# model_cfg: Dict[str, Any] = loads_model_configuration(
+#     "llm/configs/model"
+# )
+
+# Loads configuration
+cfg: Dict[str, Any] = loads_configuration()
