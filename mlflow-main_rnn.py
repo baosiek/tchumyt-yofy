@@ -73,7 +73,7 @@ def main() -> bool:
     # TODO: Add a query to filter the dataset.
     # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders()
+    train_loader, validation_loader = get_loaders(limit=5000)
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
@@ -82,7 +82,7 @@ def main() -> bool:
         return False
 
     # Start context
-    start_context: str = "Trump is the president"
+    start_context: str = "President Trump of the United"
 
     # Initialize model
     model: AbstractModel = RNNModelV1(
@@ -172,7 +172,7 @@ if __name__ == "__main__":
     run_name = "politics_global_news_rnn_model"
 
     # Model config id
-    config_id = "RNNMODEL_LSTM_1_0"
+    config_id = "RNNMODEL_LSTM_1_1"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.

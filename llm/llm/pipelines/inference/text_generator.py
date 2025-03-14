@@ -122,11 +122,6 @@ class TextGenerator():
                 new tokens
         '''
 
-        if input.shape[-1] < self.context_length:
-            input = self.pad_or_trim_sequence(
-                input=input
-            )
-
         for _ in range(max_new_tokens):
             input_trimmed: torch.Tensor = input[:, -self.context_length:]
             with torch.no_grad():
