@@ -22,7 +22,7 @@ from llm.llm import logger, cfg
 
 @pytest.fixture()
 def start_context() -> str:
-    return "Trump is the president"
+    return "President Trump of the United"
 
 
 @pytest.fixture()
@@ -31,7 +31,7 @@ def mock_cfg() -> Dict[str, Any]:
     mock_cfg: Dict[str, Any] = {
         "name": "RNNModelV1",
         "vocabulary_size": 50257,
-        "context_length": 256,
+        "context_length": 64,
         "embedding_dim": 1024,
         "num_layers": 6,
         "batch_size": 8,
@@ -43,7 +43,8 @@ def mock_cfg() -> Dict[str, Any]:
         "eval_iter": 100,
         "patience": 2,
         "delta": 1.0000,
-        "tiktoken_encoding": "gpt2"
+        "tiktoken_encoding": "gpt2",
+        "stride": 1
     }
 
     return mock_cfg
@@ -61,7 +62,7 @@ def model(mock_cfg: Dict[str, Any]) -> AbstractModel:
 @pytest.fixture
 def mock_data() -> List[Dict[str, Any]]:
     # Context length of this mock data is 256
-    with open("llm/resources/testing.json", 'r') as file:
+    with open("llm/resources/test_RNNMODEL_LSTM_1_1.json", 'r') as file:
         mock_data = json.load(file)
         return mock_data
 

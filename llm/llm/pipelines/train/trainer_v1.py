@@ -109,6 +109,14 @@ class TrainerV1():
         # Total global steps
         total_global_steps: int = num_batches * num_epochs
 
+        # Generated text before training
+        text_generated: str = self.text_generator.generate_text(
+            start_context=start_context
+        )
+
+        logger.info("Text generated before training ->"
+                    f"\n[\"{text_generated}\"]")
+
         # The training loop
         for epoch in range(num_epochs):
 
