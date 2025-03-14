@@ -16,7 +16,11 @@ class CrawlDataset(Dataset):
         super().__init__()
         self.client: TchumytMongoClient = client
 
-        logger.info(f"Querying DB: {query}")
+        if query is None:
+            logger.info("Querying DB...")
+        else:
+            logger.info(f"Querying DB with query: {query}")
+
         self.records: List[str] = list(client.query(query))
         logger.info(f"Records retrieved: {len(self.records)}")
 

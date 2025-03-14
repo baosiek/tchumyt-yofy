@@ -1,0 +1,20 @@
+{
+    "config_id": "SOLR_MONGO_PIPELINE",
+    "description": "This is the configuration tio run solr to mongo data pipeline on beam",
+    "cfg": {
+        "solr_data_source": {
+            "database": "newsDB",
+            "query": "-mongo:*"
+        },
+        "mongo_data_sink": {
+            "database": "nlp_data",
+            "collection": "crawl"
+        },
+        "services_url": {
+            "mongo": "mongodb-0.mongodb-hs.mongo.svc.cluster.local",
+            "microservices": "ms-hs.default.svc.cluster.local",
+            "zookeeper": "zk-0.zk-hs.zk.svc.cluster.local:2181,zk-1.zk-hs.zk.svc.cluster.local:2181,zk-2.zk-hs.zk.svc.cluster.local:2181/solr"
+        }
+    }
+}
+

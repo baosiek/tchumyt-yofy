@@ -175,7 +175,7 @@ class TrainerV1():
 
             # logs epoch's final losses
             logger.info(
-                f"Epoch: {epoch + 1} "
+                f"Final Epoch: {epoch + 1} "
                 f"({epoch_batches:05d}/{num_batches:05d}) "
                 f"(Step {global_step + 1:06d}/{total_global_steps:06d}): "
                 f"Train loss {train_loss:.6f}, "

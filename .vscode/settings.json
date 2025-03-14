@@ -15,6 +15,7 @@
         "probas",
         "pydantic",
         "randn",
+        "RNNMODEL",
         "tiktoken",
         "torchinfo",
         "tril",
