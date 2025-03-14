@@ -11,7 +11,7 @@ from mlflow import MlflowClient
 from llm.llm import logger, cfg
 from llm.llm.architecture.abstract_model import AbstractModel
 from llm.llm.architecture.rnn.rnn_model import RNNModelV1
-from llm.llm.pipelines.train.trainer import Trainer
+from llm.llm.pipelines.train.trainer_v1 import TrainerV1
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.inference.text_generator import TextGenerator
@@ -21,7 +21,8 @@ from llm.llm.components.decoding_strategies import TopKScaling, \
       AbstractDecodeStrategy
 
 
-def get_loaders(query: Dict[str, Any] = None) -> Tuple[DataLoader, DataLoader]:
+def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
+        Tuple[DataLoader, DataLoader]:
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
     client: TchumytMongoClient = TchumytMongoClient(
@@ -33,7 +34,7 @@ def get_loaders(query: Dict[str, Any] = None) -> Tuple[DataLoader, DataLoader]:
 
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client, limit=2000, query=query),
+        CrawlDataset(client=client, limit=limit, query=query),
         [0.9, 0.1],
         generator=generator1,
     )
@@ -65,16 +66,23 @@ def get_loaders(query: Dict[str, Any] = None) -> Tuple[DataLoader, DataLoader]:
     return (train_loader, validation_loader)
 
 
-def main():
+def main() -> bool:
     # Set the device on which the model will be trained
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # TODO: Add a query to filter the dataset.
+    # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    query: Dict[str, Any] = None
-    train_loader, validation_loader = get_loaders(query=query)
+    train_loader, validation_loader = get_loaders()
+
+    if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
+        logger.error(
+            "Train loader and/or validation loader is empty."
+        )
+        return False
 
     # Start context
-    start_context: str = "Trump is the president of the United"
+    start_context: str = "Trump is the president"
 
     # Initialize model
     model: AbstractModel = RNNModelV1(
@@ -95,7 +103,7 @@ def main():
     )
 
     # Initialize trainer
-    trainer: Trainer = Trainer(
+    trainer: TrainerV1 = TrainerV1(
         model=model,
         text_generator=text_generator,
         trainer_cfg=cfg,
@@ -131,15 +139,14 @@ def main():
         mlflow.log_metrics(metrics)
 
         metadata = {
-            "description": "this is a test",
-            "Description": "This is also a test",
+            "Description": '''This model's config_id is RNNMODEL_LSTM_1_0''',
         }
 
         # Logs the model
         mlflow.pytorch.log_model(
             model,
             artifact_path=artifact_path,
-            registered_model_name="gpt_model_politics",
+            registered_model_name="politics_global_news_rnn_model",
             metadata=metadata,
         )
 
@@ -149,6 +156,8 @@ def main():
         # Saves the training performance
         mlflow.log_artifacts("llm/pickle_objects/train_tracking_objects.pkl")
 
+    return True
+
 
 if __name__ == "__main__":
     # Use the fluent API to set the tracking uri and the active experiment
@@ -156,24 +165,32 @@ if __name__ == "__main__":
 
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
-    _experiment = mlflow.set_experiment("Politics RNNModel")
+    _experiment = mlflow.set_experiment("RNN LSTM Model")
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "politics_gptmodel_test"
+    run_name = "politics_global_news_rnn_model"
 
+    # Model config id
+    config_id = "RNNMODEL_LSTM_1_0"
+
+    # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
-    artifact_path = "mlflow-artifacts:/585006454050763634/model/politics_rnn_model"
+    artifact_path = f"mlflow-artifacts:/tchumyt/model/{config_id}"
 
-    main()
+    if not main():
+        logger.error("Training failed. Exiting.")
+        exit(1)
 
     client = MlflowClient(mlflow.get_tracking_uri())
-    model_info = client.get_latest_versions("rnn_model_politics")[0]
+    model_info = client.get_latest_versions(
+        config_id
+    )[0]
     client.set_registered_model_alias(
-        "rnn_model_politics", "challenger", model_info.version
+        config_id, "challenger", model_info.version
     )
     client.set_model_version_tag(
-        name="rnn_model_politics",
+        name=config_id,
         version=model_info.version,
         key="nlp",
         value="text_generation",

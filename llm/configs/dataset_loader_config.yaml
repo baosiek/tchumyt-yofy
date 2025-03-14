@@ -1,4 +1,5 @@
 mongo_host: "www.mongo.ca"
 mongo_port: "30018"
 dataset: "nlp_data"
-collection: "crawl_dataset"
+# collection: "RNNMODEL_LSTM_1_0"
+collection: "RNNMODEL_LSTM_1_0"

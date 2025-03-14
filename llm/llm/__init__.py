@@ -135,10 +135,11 @@ def loads_configuration() -> Dict[str, Any]:
         collection = database["models"]
 
         results = collection.find_one(
-            {"name": "RNNModel", "type": "LSTM", "version": "1.0"}
+            {"config_id": "RNNMODEL_LSTM_1_0"}
         )
 
-        logger.info(f"Configuration loaded from MongoDB: {results['cfg']}")
+        logger.info(f"Configuration {results["config_id"]} "
+                    f"loaded from MongoDB: {results["cfg"]}")
 
         client.close()
 

@@ -131,7 +131,7 @@ def test_trainer_initialization(
     trainer: Trainer = Trainer(
         model=model,
         text_generator=text_generator,
-        trainer_cfg=trainer_cfg,
+        trainer_cfg=cfg,
         device=device
     )
 
