@@ -4,11 +4,11 @@
     "cfg": {
         "solr_data_source": {
             "database": "newsDB",
-            "query": "-mongo:*"
+            "query": "content:Trump"
         },
         "mongo_data_sink": {
             "database": "nlp_data",
-            "collection": "crawl"
+            "collection": "trump_data"
         },
         "services_url": {
             "mongo": "mongodb-0.mongodb-hs.mongo.svc.cluster.local",

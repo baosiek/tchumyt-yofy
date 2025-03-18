@@ -1,5 +1,7 @@
 import mlflow
 import torch
+import os
+import shutil
 
 from typing import Any, Dict, List, Tuple
 from torchinfo import summary
@@ -8,7 +10,7 @@ from torch.utils.data.dataset import Subset
 from mlflow import MlflowClient
 
 
-from llm.llm import logger, cfg
+from llm.llm import logger, cfg, init_cfg
 from llm.llm.architecture.abstract_model import AbstractModel
 from llm.llm.architecture.rnn.rnn_model import RNNModelV1
 from llm.llm.pipelines.train.trainer_v1 import TrainerV1
@@ -26,7 +28,7 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
     client: TchumytMongoClient = TchumytMongoClient(
-        "llm/configs/dataset_loader_config.yaml",
+        "llm/configs/init_config.yaml",
     )
 
     # 1.2 Generator to enabling split dataset into train and validation subsets
@@ -66,14 +68,14 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
     return (train_loader, validation_loader)
 
 
-def main() -> bool:
+def main(run_name: str) -> bool:
     # Set the device on which the model will be trained
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # TODO: Add a query to filter the dataset.
     # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders(limit=5000)
+    train_loader, validation_loader = get_loaders(limit=100)
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
@@ -82,11 +84,11 @@ def main() -> bool:
         return False
 
     # Start context
-    start_context: str = "President Trump of the United"
+    start_context: str = "Trump is the president of the"
 
     # Initialize model
     model: AbstractModel = RNNModelV1(
-        cfg=cfg, device="cuda" if torch.cuda.is_available() else "cpu"
+        cfg=cfg, device=device
     )
 
     # Sets the strategy for decoding
@@ -110,7 +112,10 @@ def main() -> bool:
         device=device
     )
 
-    with mlflow.start_run(run_name=run_name):
+    with mlflow.start_run(
+        run_name=run_name,
+        description="Testing LSTM on RNN"
+    ):
         mlflow.enable_system_metrics_logging()
 
         # Logs training parameters
@@ -138,23 +143,45 @@ def main() -> bool:
         # Log metrics that were calculated during training
         mlflow.log_metrics(metrics)
 
-        metadata = {
-            "Description": '''This model's config_id is RNNMODEL_LSTM_1_0''',
-        }
+        '''
+        While saving the model to MLFlow, the function
+        mlflow.pytorch.log_model() is corrupting the logger
+        file. It will take time to find why and correct it.
 
+        The following code backups the log file as it is now.
+        '''
+        # Copy the contents of the source file to the destination file
+        shutil.copyfile("llm/logs/project.log", "llm/logs/project.bak.log")
+
+        # Define an artifact path that the model will be saved to.
+        artifact_path_model = f"tchumyt/model/{init_cfg["collection"]}"
         # Logs the model
         mlflow.pytorch.log_model(
             model,
-            artifact_path=artifact_path,
-            registered_model_name="politics_global_news_rnn_model",
-            metadata=metadata,
+            artifact_path=artifact_path_model,
+            registered_model_name=init_cfg["collection"],
         )
 
+        # Recover original log file
+        shutil.copyfile("llm/logs/project.bak.log", "llm/logs/project.log")
+
+        # Check if the file exists before attempting to delete it
+        if os.path.exists("llm/logs/project.bak.log"):
+            os.remove("llm/logs/project.bak.log")
+
         # Saves the training log
-        mlflow.log_artifacts("llm/logs/project.log")
+        artifact_path_log = "logs"
+        mlflow.log_artifact(
+            "llm/logs/project.log",
+            artifact_path_log
+        )
 
         # Saves the training performance
-        mlflow.log_artifacts("llm/pickle_objects/train_tracking_objects.pkl")
+        artifact_path_objects = "objects"
+        mlflow.log_artifact(
+            "llm/pickle_objects/train_tracking_objects.pkl",
+            artifact_path_objects
+        )
 
     return True
 
@@ -169,31 +196,28 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "politics_global_news_rnn_model"
-
-    # Model config id
-    config_id = "RNNMODEL_LSTM_1_1"
+    run_name = "initial training with limit set to 1000"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
-    artifact_path = f"mlflow-artifacts:/tchumyt/model/{config_id}"
+    artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
-    if not main():
+    if not main(run_name):
         logger.error("Training failed. Exiting.")
         exit(1)
 
     client = MlflowClient(mlflow.get_tracking_uri())
     model_info = client.get_latest_versions(
-        config_id
+        init_cfg["collection"]
     )[0]
     client.set_registered_model_alias(
-        config_id, "challenger", model_info.version
+        init_cfg["collection"], "challenger", model_info.version
     )
     client.set_model_version_tag(
-        name=config_id,
+        name=init_cfg["collection"],
         version=model_info.version,
         key="nlp",
         value="text_generation",
     )
 
-    logger.info("The End!")
+    logger.info("The End")

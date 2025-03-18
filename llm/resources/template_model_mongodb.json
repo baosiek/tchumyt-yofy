@@ -1,12 +1,12 @@
 {
-    "config_id": "RNNMODEL_LSTM_1_1",
+    "config_id": "RNNMODEL_LSTM_1_0",
     "name": "RNNModel",
     "type": "LSTM",
     "version": "1.1",
     "description": "LSTM Model run within RNN architecture",
     "cfg": {
         "vocabulary_size": 50257,
-        "context_length": 64,
+        "context_length": 256,
         "embedding_dim": 1024,
         "num_layers": 6,
         "batch_size": 8,
@@ -14,7 +14,7 @@
         "weight_decay": 0.1,
         "num_epochs": 2,
         "eval_freq": 1000,
-        "eval_iter": 100,
+        "eval_iter": 1000,
         "temperature": 0.1,
         "patience": 3,
         "delta": 1.0,

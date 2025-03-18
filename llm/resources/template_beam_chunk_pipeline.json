@@ -2,13 +2,13 @@
     "config_id": "CHUNK_PIPELINE",
     "description": "This is the configuration tio run chunk_pipeline on beam",
     "cfg": {
-        "model_cfg_id": "RNNModel_LSTM_1_1",
+        "model_cfg_id": "RNNMODEL_LSTM_1_1",
         "data_source": {
             "database": "nlp_data",
-            "collection": "crawl"
+            "collection": "trump_data"
         },
         "data_sink": {
-            "database": "nlp_data"
+            "database": "models_data"
         },
         "services_url": {
             "mongo": "mongodb-0.mongodb-hs.mongo.svc.cluster.local",
