@@ -40,6 +40,7 @@ class TrainerV1():
 
         # Trainer configuration
         self.trainer_cfg: Dict[str, Any] = trainer_cfg
+        logger.info(f"Trainer configuration: {self.trainer_cfg}")
 
         # The initialized model to be trained
         self.model: AbstractModel = model.to(device)
@@ -176,10 +177,19 @@ class TrainerV1():
                         f"(Step {global_step:06d}/{total_global_steps:06d}): "
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}, "
-                        f"Elapsed {(timedelta(
+                        f"Elapsed({eval_freq}) {(timedelta(
                             elapsed.days,
                             elapsed.seconds))}"
                         )
+                    # Resets start_batch chronograph
+                    start_batch: datetime.datetime = datetime.datetime.now()
+
+            # Computes the time of the end of the epoch
+            epoch_end: datetime.timedelta = \
+                datetime.datetime.now() - start_epoch
+
+            # Resets start epochs
+            start_epoch = datetime.datetime.now()
 
             # logs epoch's final losses
             logger.info(
@@ -189,8 +199,8 @@ class TrainerV1():
                 f"Train loss {train_loss:.6f}, "
                 f"Val loss {val_loss:.6f} ,"
                 f"Elapsed {(timedelta(
-                    elapsed.days,
-                    elapsed.seconds))}"
+                    epoch_end.days,
+                    epoch_end.seconds))}"
                 )
 
             text_generated: str = self.text_generator.generate_text(
@@ -215,11 +225,12 @@ class TrainerV1():
                 texts_generated=texts_generated
             )
 
-            # register the moment epoch finishes
-            end_epoch: datetime.datetime = datetime.datetime.now()
+            # # register the moment epoch finishes
+            # end_epoch: datetime.datetime = datetime.datetime.now()
 
             # logs epoch processing time
-            elapsed_time: datetime.timedelta = end_epoch - start_epoch
+            elapsed_time: datetime.timedelta = \
+                datetime.datetime.now() - start_epoch
             logger.info(
                 f"Epoch: {epoch + 1} "
                 f"Processing time: {datetime.timedelta(
@@ -251,7 +262,8 @@ class TrainerV1():
 
         logger.info(
             f"Training processing time: {datetime.timedelta(
-                elapsed_time.days, elapsed_time.seconds
+                elapsed_time.days,
+                elapsed_time.seconds
             )}"
         )
 

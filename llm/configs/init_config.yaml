@@ -1,0 +1,9 @@
+mongo_host: "www.mongo.ca"
+mongo_port: "30018"
+dataset: "models_data"
+collection: "RNNMODEL_LSTM_1_0"
+data_config_id: "CHUNK_PIPELINE"
+
+# collection above is both the name of the collection
+# with the data to train the model as it is also
+# the config_id of the model

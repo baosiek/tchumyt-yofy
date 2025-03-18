@@ -181,4 +181,4 @@ if __name__ == "__main__":
         value='text_generation'
     )
 
-    logger.info("The End!")
+    logger.info("The End")
