@@ -97,6 +97,8 @@ class RNNModelV1(AbstractModel):
             torch.arange(seq_length).to(device=self.device)
         )
 
+        # TODO: Insert a Dropout layer
+
         input_embeddings_ = token_embeddings_ + pos_embeddings_
 
         states = None
