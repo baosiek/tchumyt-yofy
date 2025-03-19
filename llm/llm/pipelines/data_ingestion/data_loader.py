@@ -6,7 +6,7 @@ from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 # Helper method to create dataset loader
 def create_crawl_dataset_loader(
         crawl_dataset: CrawlDataset,
-        batch_size: int = 8,
+        batch_size: int,
         shuffle: bool = False
         ) -> DataLoader:
 

@@ -3,7 +3,7 @@ import torch
 from typing import Tuple
 from torch.utils.data import DataLoader
 
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm import logger
 
 

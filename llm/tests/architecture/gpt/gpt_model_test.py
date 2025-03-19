@@ -1,8 +1,8 @@
 import pytest
 import torch
 
-from llm.llm import model_cfg
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm import cfg
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 
 
 @pytest.fixture
@@ -24,11 +24,11 @@ def get_batch() -> torch.Tensor:
 def test_gpt_model(get_batch: torch.Tensor):
     torch.manual_seed(123)
 
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
     output: torch.Tensor = model(get_batch)
 
     batch_size: int = get_batch.shape[0]
-    vocabulary_size: int = model_cfg['vocabulary_size']
+    vocabulary_size: int = cfg['vocabulary_size']
     sequence_size: int = get_batch.shape[1]
 
     total_params: int = sum([p.numel() for p in model.parameters()])

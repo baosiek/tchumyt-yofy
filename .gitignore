@@ -167,3 +167,10 @@ cython_debug/
 # Pickle
 *.pkl
 
+# Book directory
+notebooks/rnns/books/
+
+# mlflow directories
+mlruns/
+mlartifacts/
+

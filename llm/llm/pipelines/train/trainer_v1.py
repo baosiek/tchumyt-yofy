@@ -9,7 +9,7 @@ from torch.optim import AdamW
 from typing import Any, Dict, List
 
 from llm.llm import logger
-from llm.llm.architecture.gpt.gpt_model import GPTModel
+from llm.llm.architecture.abstract_model import AbstractModel
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.early_stop import EarlyStop
@@ -28,10 +28,10 @@ Returns:
 """
 
 
-class Trainer():
+class TrainerV1():
     def __init__(
             self,
-            model: GPTModel,
+            model: AbstractModel,
             text_generator: TextGenerator,
             trainer_cfg: Dict[str, Any],
             device: str,
@@ -40,9 +40,10 @@ class Trainer():
 
         # Trainer configuration
         self.trainer_cfg: Dict[str, Any] = trainer_cfg
+        logger.info(f"Trainer configuration: {self.trainer_cfg}")
 
         # The initialized model to be trained
-        self.model: GPTModel = model.to(device)
+        self.model: AbstractModel = model.to(device)
 
         # The text generator class that uses the trained model
         # to generate new text
@@ -109,6 +110,14 @@ class Trainer():
         # Total global steps
         total_global_steps: int = num_batches * num_epochs
 
+        # Generated text before training
+        text_generated: str = self.text_generator.generate_text(
+            start_context=start_context
+        )
+
+        logger.info("Text generated before training ->"
+                    f"\n[\"{text_generated}\"]")
+
         # The training loop
         for epoch in range(num_epochs):
 
@@ -168,21 +177,30 @@ class Trainer():
                         f"(Step {global_step:06d}/{total_global_steps:06d}): "
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}, "
-                        f"Elapsed {(timedelta(
+                        f"Elapsed({eval_freq}) {(timedelta(
                             elapsed.days,
                             elapsed.seconds))}"
                         )
+                    # Resets start_batch chronograph
+                    start_batch: datetime.datetime = datetime.datetime.now()
+
+            # Computes the time of the end of the epoch
+            epoch_end: datetime.timedelta = \
+                datetime.datetime.now() - start_epoch
+
+            # Resets start epochs
+            start_epoch = datetime.datetime.now()
 
             # logs epoch's final losses
             logger.info(
-                f"Epoch: {epoch + 1} "
+                f"Final Epoch: {epoch + 1} "
                 f"({epoch_batches:05d}/{num_batches:05d}) "
                 f"(Step {global_step + 1:06d}/{total_global_steps:06d}): "
                 f"Train loss {train_loss:.6f}, "
                 f"Val loss {val_loss:.6f} ,"
                 f"Elapsed {(timedelta(
-                    elapsed.days,
-                    elapsed.seconds))}"
+                    epoch_end.days,
+                    epoch_end.seconds))}"
                 )
 
             text_generated: str = self.text_generator.generate_text(
@@ -207,11 +225,12 @@ class Trainer():
                 texts_generated=texts_generated
             )
 
-            # register the moment epoch finishes
-            end_epoch: datetime.datetime = datetime.datetime.now()
+            # # register the moment epoch finishes
+            # end_epoch: datetime.datetime = datetime.datetime.now()
 
             # logs epoch processing time
-            elapsed_time: datetime.timedelta = end_epoch - start_epoch
+            elapsed_time: datetime.timedelta = \
+                datetime.datetime.now() - start_epoch
             logger.info(
                 f"Epoch: {epoch + 1} "
                 f"Processing time: {datetime.timedelta(
@@ -243,7 +262,8 @@ class Trainer():
 
         logger.info(
             f"Training processing time: {datetime.timedelta(
-                elapsed_time.days, elapsed_time.seconds
+                elapsed_time.days,
+                elapsed_time.seconds
             )}"
         )
 

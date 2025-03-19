@@ -4,7 +4,7 @@ import torch
 from typing import Dict, Any, List
 from tiktoken.core import Encoding
 
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 
 
 class TextProvider():
