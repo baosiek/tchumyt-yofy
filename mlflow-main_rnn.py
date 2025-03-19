@@ -75,7 +75,7 @@ def main(run_name: str) -> bool:
     # TODO: Add a query to filter the dataset.
     # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders(limit=100)
+    train_loader, validation_loader = get_loaders()
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
