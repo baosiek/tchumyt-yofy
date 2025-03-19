@@ -5,7 +5,6 @@ from typing import Any, Dict
 from pymongo.cursor import Cursor
 
 from llm.llm.utils.commons import read_yaml
-from llm.llm import logger
 
 
 class TchumytMongoClient():
@@ -24,8 +23,6 @@ class TchumytMongoClient():
         uri: str = (f"mongodb://{username}:{password}"
                     f"@{configuration['mongo_host']}:"
                     f"{configuration['mongo_port']}")
-
-        logger.info(f"MongoDB URI: {uri}")
 
         self.client: pymongo.MongoClient = pymongo.MongoClient(uri)
 

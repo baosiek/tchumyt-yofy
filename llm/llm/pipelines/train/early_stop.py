@@ -1,7 +1,7 @@
 import torch
 
 from llm.llm import logger
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 
 
 class EarlyStop():

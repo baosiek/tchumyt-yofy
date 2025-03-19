@@ -6,6 +6,7 @@ import json
 import yaml
 
 from typing import Dict, Any
+from pymongo import MongoClient
 
 
 def initialize_logger(log_dir: str) -> logging.Logger:
@@ -39,7 +40,7 @@ def initialize_logger(log_dir: str) -> logging.Logger:
         with open(log_path, 'r') as file:
             config = json.load(file)
             logging.config.dictConfig(config)
-            logger = logging.getLogger("gpt_model")
+            logger = logging.getLogger("rnn_model")
             logger.info(f"logger configured with file: {log_path}")
     except FileNotFoundError as error:
         raise error(f"{log_path} was not found")
@@ -123,15 +124,78 @@ def loads_trainer_configuration(config_dir: str) -> Dict[str, Any]:
     return cfg
 
 
+def loads_init_configuration() -> Dict[str, Any]:
+    '''
+    This function loads the initializing configuration.
+
+    Args:
+        None
+
+    Return:
+        init_cfg: Dict[str, Any] -> the dictionary with the configuration
+    '''
+
+    # The config directory
+    config_dir: str = "llm/configs"
+
+    # production configuration
+    config_path: os.path = os.path.join(config_dir, "init_config.yaml")
+
+    # trainer configuration
+    try:
+        with open(config_path, 'r') as file:
+            cfg = yaml.safe_load(file)
+    except FileNotFoundError as error:
+        logger.error(f"File [{config_path}] not found")
+        raise error
+
+    return cfg
+
+
+def loads_configuration(config_id: str) -> Dict[str, Any]:
+    '''
+    This function loads the configuration file from MongoDB
+    '''
+    try:
+        uri = "mongodb://baosiek:123456@www.mongo.ca:30018"
+        client = MongoClient(uri)
+        database = client["configs"]
+        collection = database["models"]
+
+        results = collection.find_one(
+            {"config_id": config_id}
+        )
+
+        logger.info(f"Configuration {results["config_id"]} "
+                    f"loaded from MongoDB: {results["cfg"]}")
+
+        client.close()
+
+        return results['cfg']
+
+    except Exception as e:
+        raise Exception(
+            f"Error while loading configuration from MongoDB: {e}"
+        )
+
+
 # Initializes the logger
 logger: logging.Logger = initialize_logger("llm/configs/logger")
 
-# Loads trainer configuration
-trainer_cfg: Dict[str, Any] = loads_trainer_configuration(
-    "llm/configs/trainer"
-)
+# # Loads trainer configuration
+# trainer_cfg: Dict[str, Any] = loads_trainer_configuration(
+#     "llm/configs/trainer"
+# )
 
-# Loads model configuration
-model_cfg: Dict[str, Any] = loads_model_configuration(
-    "llm/configs/model"
-)
+# # Loads model configuration
+# model_cfg: Dict[str, Any] = loads_model_configuration(
+#     "llm/configs/model"
+# )
+
+init_cfg: Dict[str, Any] = loads_init_configuration()
+logger.info(f"Initialization configuration is: {init_cfg}")
+
+# Loads configuration
+cfg: Dict[str, Any] = loads_configuration(config_id=init_cfg["collection"])
+
+# TODO: Needs to test the above cfg loader

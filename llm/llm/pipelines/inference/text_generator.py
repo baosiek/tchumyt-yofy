@@ -1,11 +1,12 @@
 import tiktoken
 from tiktoken.core import Encoding
 import torch
+import torch.nn.functional as F
 
 from typing import List
 
 from llm.llm import logger
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy
 
 """
@@ -55,6 +56,12 @@ class TextGenerator():
         logger.info("Text generator initialized with:")
         logger.info(f"\tTokenizer encoding: {encoding}")
         logger.info(f"\tDecode strategy: {str(decode_strategy.__name__)}")
+
+    def pad_or_trim_sequence(self, input: torch.Tensor):
+        input = input[:, :self.context_length]
+        output = F.pad(input, (0, self.context_length - input.shape[1]),
+                       "constant", 0)
+        return output
 
     def text_to_token_ids(self, text: str) -> torch.Tensor:
         '''
@@ -148,7 +155,6 @@ class TextGenerator():
             token_ids = self.to_text(
                 encoded,
                 max_new_tokens=50,
-                # decode_strategy=self.decode_strategy
             )
 
         decoded_text = self.token_ids_to_text(token_ids=token_ids)

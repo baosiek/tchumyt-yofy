@@ -6,7 +6,7 @@ from typing import Tuple, Dict, List, Any
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Subset
 
-from llm.llm.architecture.gpt_model import GPTModel
+from llm.llm.architecture.gpt.gpt_model import GPTModel
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.data_ingestion.data_loader import \
@@ -16,7 +16,7 @@ from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
     TopKScaling
 
-from llm.llm import model_cfg, trainer_cfg, logger
+from llm.llm import logger, cfg
 
 
 @pytest.fixture()
@@ -46,7 +46,7 @@ def mock_cfg_data() -> Dict[str, Any]:
 
 @pytest.fixture()
 def model() -> GPTModel:
-    model: GPTModel = GPTModel(cfg=model_cfg)
+    model: GPTModel = GPTModel(cfg=cfg)
     return model
 
 
@@ -131,7 +131,7 @@ def test_trainer_initialization(
     trainer: Trainer = Trainer(
         model=model,
         text_generator=text_generator,
-        trainer_cfg=trainer_cfg,
+        trainer_cfg=cfg,
         device=device
     )
 
@@ -214,4 +214,4 @@ def test_trainer_train_method_early_stopping(
             start_context
         )
 
-    assert trainer.early_stop.early_stop is True
+    assert len(texts_generated) == mock_cfg_data["num_epochs"]

@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from typing import Dict, Any
 
-from llm.llm.architecture.feed_forward import FeedForward
+from llm.llm.architecture.gpt.feed_forward import FeedForward
 
 
 class TransformerBlock(nn.Module):
@@ -68,8 +68,8 @@ class TransformerBlock(nn.Module):
             ).bool()
 
         # Applies the transformer block flow
-        x = self.norm1(x)        
-        x, _ = self.attention(x, x, x, attn_mask=attention_mask)        
+        x = self.norm1(x)
+        x, _ = self.attention(x, x, x, attn_mask=attention_mask)
         x = self.drop_shortcut(x)
         x = x + shortcut
 
