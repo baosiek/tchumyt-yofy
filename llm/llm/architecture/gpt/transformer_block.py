@@ -68,8 +68,8 @@ class TransformerBlock(nn.Module):
             ).bool()
 
         # Applies the transformer block flow
-        x = self.norm1(x)        
-        x, _ = self.attention(x, x, x, attn_mask=attention_mask)        
+        x = self.norm1(x)
+        x, _ = self.attention(x, x, x, attn_mask=attention_mask)
         x = self.drop_shortcut(x)
         x = x + shortcut
 
