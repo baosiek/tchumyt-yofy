@@ -55,10 +55,10 @@ class TymysLLM(nn.Module):
             ('act_1', nn.GELU()),
             ('linear_2', nn.Linear(self.hidden_size, self.hidden_size)),
             ('act_2', nn.GELU()),
-            # ('linear_3', nn.Linear(self.hidden_size, self.hidden_size)),
-            # ('act_3', nn.GELU()),
-            # ('linear_4', nn.Linear(self.hidden_size, self.hidden_size)),
-            # ('act_4', nn.GELU()),
+            ('linear_3', nn.Linear(self.hidden_size, self.hidden_size)),
+            ('act_3', nn.GELU()),
+            ('linear_4', nn.Linear(self.hidden_size, self.hidden_size)),
+            ('act_4', nn.GELU()),
         ]))
 
         self.grammar_model = nn.Sequential(OrderedDict([
@@ -70,14 +70,14 @@ class TymysLLM(nn.Module):
                 self.hidden_size, self.hidden_size
             )),
             ('act_2', nn.GELU()),
-            # ('linear_3', nn.Linear(
-            #     self.hidden_size, self.hidden_size
-            # )),
-            # ('act_3', nn.GELU()),
-            # ('linear_4', nn.Linear(
-            #     self.hidden_size, self.hidden_size
-            # )),
-            # ('act_4', nn.GELU()),
+            ('linear_3', nn.Linear(
+                self.hidden_size, self.hidden_size
+            )),
+            ('act_3', nn.GELU()),
+            ('linear_4', nn.Linear(
+                self.hidden_size, self.hidden_size
+            )),
+            ('act_4', nn.GELU()),
         ]))
 
         self.output = nn.Sequential(OrderedDict([
