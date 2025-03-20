@@ -49,6 +49,9 @@ class minGRU(Module):
 
             hidden: torch.Tensor = g(hidden)
             gate = gate.sigmoid()
+            print(f"prev_hidden shape: {prev_hidden.shape}")
+            print(f"hidden shape: {hidden.shape}")
+            print(f"gate shape: {gate.shape}")
             out = torch.lerp(prev_hidden, hidden, gate) \
                 if exists(prev_hidden) else (hidden * gate)
         else:

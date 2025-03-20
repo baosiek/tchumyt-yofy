@@ -36,8 +36,8 @@ class TymysLLM(nn.Module):
         self.drop_mental_mlp: nn.Dropout = nn.Dropout(self.dropout_rate)
         self.drop_grammar_mlp: nn.Dropout = nn.Dropout(self.dropout_rate)
 
-        self.norm0: nn.LayerNorm = nn.LayerNorm(self.dropout_rate)
-        self.norm1: nn.LayerNorm = nn.LayerNorm(self.dropout_rate)
+        self.norm0: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
+        self.norm1: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
         self.norm2: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
         self.norm3: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
         self.norm4: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
@@ -96,22 +96,29 @@ class TymysLLM(nn.Module):
             X: torch.Tensor
             ) -> torch.Tensor:
         # validate input:
-        # shape and dtype
+        if len(X.shape) != 2:
+            raise RuntimeError("Input must have shape of "
+                               "[batch_size, sequence_length]. "
+                               f"Shape of input is: {X.shape}")
+        print(f"X shape: {X.shape}")
 
         # comments
-        shortcut: torch.Tensor = X
         X: torch.Tensor = self.embeddings(X)
         X = self.drop_embedding(X)
+
+        shortcut: torch.Tensor = X
 
         X = self.norm0(X)
         output, hidden_state = self.minGRU(X, return_next_prev_hidden=True)
         X = output + hidden_state
         X = self.drop_rnn(X)
+        print(f"X shape: {X.shape}")
+        print(f"shortcut shape: {shortcut.shape}")
         X = X + shortcut
 
         # multihead
         X = self.norm1(X)
-        X = self.multihead_attn(X, X, X)
+        X, _ = self.multihead_attn(X, X, X)
         X = self.drop_att(X)
         X = X + shortcut
 
