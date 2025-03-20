@@ -55,29 +55,29 @@ class TymysLLM(nn.Module):
             ('act_1', nn.GELU()),
             ('linear_2', nn.Linear(self.hidden_size, self.hidden_size)),
             ('act_2', nn.GELU()),
-            ('linear_3', nn.Linear(self.hidden_size, self.hidden_size)),
-            ('act_3', nn.GELU()),
-            ('linear_4', nn.Linear(self.hidden_size, self.hidden_size)),
-            ('act_4', nn.GELU()),
+            # ('linear_3', nn.Linear(self.hidden_size, self.hidden_size)),
+            # ('act_3', nn.GELU()),
+            # ('linear_4', nn.Linear(self.hidden_size, self.hidden_size)),
+            # ('act_4', nn.GELU()),
         ]))
 
         self.grammar_model = nn.Sequential(OrderedDict([
             ('linear_1', nn.Linear(
-                self.hidden_size, self.vocabulary_size
+                self.hidden_size, self.hidden_size
             )),
             ('act_1', nn.GELU()),
             ('linear_2', nn.Linear(
-                self.vocabulary_size, self.vocabulary_size
+                self.hidden_size, self.hidden_size
             )),
             ('act_2', nn.GELU()),
-            ('linear_3', nn.Linear(
-                self.vocabulary_size, self.vocabulary_size
-            )),
-            ('act_3', nn.GELU()),
-            ('linear_4', nn.Linear(
-                self.vocabulary_size, self.hidden_size
-            )),
-            ('act_4', nn.GELU()),
+            # ('linear_3', nn.Linear(
+            #     self.hidden_size, self.hidden_size
+            # )),
+            # ('act_3', nn.GELU()),
+            # ('linear_4', nn.Linear(
+            #     self.hidden_size, self.hidden_size
+            # )),
+            # ('act_4', nn.GELU()),
         ]))
 
         self.output = nn.Sequential(OrderedDict([
@@ -85,9 +85,9 @@ class TymysLLM(nn.Module):
                 self.hidden_size, self.vocabulary_size
             )),
             ('act_4', nn.GELU()),
-            ('linear_2', nn.Linear(
-                self.vocabulary_size, self.vocabulary_size
-            )),
+            # ('linear_2', nn.Linear(
+            #     self.vocabulary_size, self.vocabulary_size
+            # )),
             ('out_act', nn.Sigmoid()),
         ]))
 
@@ -100,7 +100,6 @@ class TymysLLM(nn.Module):
             raise RuntimeError("Input must have shape of "
                                "[batch_size, sequence_length]. "
                                f"Shape of input is: {X.shape}")
-        print(f"X shape: {X.shape}")
 
         # comments
         X: torch.Tensor = self.embeddings(X)
@@ -108,12 +107,10 @@ class TymysLLM(nn.Module):
 
         shortcut: torch.Tensor = X
 
-        X = self.norm0(X)
+        # X = self.norm0(X)
         output, hidden_state = self.minGRU(X, return_next_prev_hidden=True)
         X = output + hidden_state
         X = self.drop_rnn(X)
-        print(f"X shape: {X.shape}")
-        print(f"shortcut shape: {shortcut.shape}")
         X = X + shortcut
 
         # multihead

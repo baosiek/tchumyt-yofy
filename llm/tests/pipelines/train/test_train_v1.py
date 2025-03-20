@@ -91,7 +91,7 @@ def loaders(mock_data,
     )
 
     client: TchumytMongoClient = TchumytMongoClient(
-        "llm/configs/dataset_loader_config.yaml"
+        "llm/configs/init_config.yaml"
     )
 
     # Generator to enabling split dataset into train and validation subsets
