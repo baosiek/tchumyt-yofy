@@ -54,6 +54,7 @@ class HFBPETokenizer():
             self,
             vocab_size: int,
             save_to_path: str,
+            add_tokens: List[str] = None,
             dataset: DatasetDict = None,
             train_dataset: Dataset = None,
             test_dataset: Dataset = None,
@@ -77,10 +78,15 @@ class HFBPETokenizer():
                 Default is None.
             val_dataset (Dataset): A Dataset object containing the validation
                 data. Default is None.
+            add_tokens (List[str]): A list of additional tokens to add to the
+                tokenizer. Default is None.
 
         Returns:
             None
         '''
+
+        if add_tokens is not None:
+            self.tokenizer.add_tokens(add_tokens)
 
         if dataset is not None:
             self.train_dataset: Dataset = dataset["train"]
