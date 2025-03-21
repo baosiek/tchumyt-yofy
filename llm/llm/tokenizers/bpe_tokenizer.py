@@ -113,8 +113,11 @@ class HFBPETokenizer():
             self.dataset_iterator_(),
             trainer=trainer
         )
-
-        logger.info("Saving tokenizer")
+        self.tokenizer.get_vocab_size()
+        logger.info(
+            "Saving tokenizer with vocab size: "
+            f"{self.tokenizer.get_vocab_size()}"
+        )
 
         # "/home/baosiek/Projects/tchumyt-yofy/llm/resources/wiki_tokenizer.json"
         self.tokenizer.save(save_to_path)
