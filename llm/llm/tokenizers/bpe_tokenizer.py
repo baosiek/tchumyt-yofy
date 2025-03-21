@@ -110,8 +110,7 @@ class HFBPETokenizer():
 
         logger.info("Training tokenizer")
         self.tokenizer.train_from_iterator(
-            self.dataset_iterator,
-            vocab_size=vocab_size,
+            self.dataset_iterator_(),
             trainer=trainer
         )
 
@@ -156,7 +155,6 @@ class HFBPETokenizer():
             )
         return self.tokenizer.decode(tokens, skip_special_tokens=True)
 
-    @classmethod
     def dataset_iterator_(self) -> Generator[Any, Any, Any]:
         data_iterator: List[Dataset] = [self.train_dataset,
                                         self.test_dataset,
