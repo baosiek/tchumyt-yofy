@@ -97,3 +97,14 @@ def test_dataset_iterator(sample_dataset):
     texts = list(iterator)
     assert len(texts) == 5
     assert all(isinstance(text, str) for text in texts)
+
+
+def test_hello_world():
+    tokenizer = HFBPETokenizer(tokenizer_path="llm/resources/bpe_tokenizer.json")
+    encoded = tokenizer.encode("Hello, world!")
+    print(encoded)
+    assert isinstance(encoded, list)
+    assert len(encoded) > 0
+    decoded = tokenizer.decode(encoded)
+    assert isinstance(decoded, str)
+    assert "He" in decoded
