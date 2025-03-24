@@ -25,6 +25,7 @@
         "Osama",
         "probas",
         "pydantic",
+        "pymongo",
         "randn",
         "RNNMODEL",
         "softplus",
