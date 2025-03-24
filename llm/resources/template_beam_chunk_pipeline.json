@@ -1,8 +1,8 @@
 {
-    "config_id": "CHUNK_PIPELINE",
-    "description": "This is the configuration tio run chunk_pipeline on beam",
+    "config_id": "TMYTS_PIPELINE",
+    "description": "This is the configuration tio run TMYTS_PIPELINE on beam",
     "cfg": {
-        "model_cfg_id": "RNNMODEL_LSTM_1_1",
+        "model_cfg_id": "TMYTS_0_0",
         "data_source": {
             "database": "nlp_data",
             "collection": "trump_data"
@@ -12,7 +12,8 @@
         },
         "services_url": {
             "mongo": "mongodb-0.mongodb-hs.mongo.svc.cluster.local",
-            "microservices": "ms-hs.default.svc.cluster.local"
+            "microservices": "ms-hs.default.svc.cluster.local",
+            "endpoint": "text/bpe_tokenize"
         }
     }
 }

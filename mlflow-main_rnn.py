@@ -75,7 +75,7 @@ def main(run_name: str) -> bool:
     # TODO: Add a query to filter the dataset.
     # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders()
+    train_loader, validation_loader = get_loaders(limit=1000)
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
@@ -192,11 +192,11 @@ if __name__ == "__main__":
 
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
-    _experiment = mlflow.set_experiment("RNN LSTM Model")
+    _experiment = mlflow.set_experiment("TMYTS Model")
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "initial training with limit set to 1000"
+    run_name = "training 001"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
