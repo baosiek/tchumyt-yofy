@@ -11,12 +11,12 @@ from mlflow import MlflowClient
 
 
 from llm.llm import logger, cfg, init_cfg
-from llm.llm.architecture.abstract_model import AbstractModel
-from llm.llm.architecture.rnn.rnn_model import RNNModelV1
+from llm.llm.architecture.tmyts.tmyts_llm import TymysLLM
 from llm.llm.pipelines.train.trainer_v1 import TrainerV1
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
-from llm.llm.pipelines.inference.text_generator import TextGenerator
+from llm.llm.pipelines.inference.text_generator_hfbpe import TextGenerator
+from llm.llm.tokenizers.bpe_tokenizer import HFBPETokenizer
 from llm.llm.pipelines.data_ingestion.data_loader import \
     create_crawl_dataset_loader
 from llm.llm.components.decoding_strategies import TopKScaling, \
@@ -75,7 +75,7 @@ def main(run_name: str) -> bool:
     # TODO: Add a query to filter the dataset.
     # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders(limit=1000)
+    train_loader, validation_loader = get_loaders()
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
@@ -86,9 +86,20 @@ def main(run_name: str) -> bool:
     # Start context
     start_context: str = "Trump is the president of the"
 
-    # Initialize model
-    model: AbstractModel = RNNModelV1(
-        cfg=cfg, device=device
+    # Gets hyperparameters from configuration file
+    hidden_dim: int = cfg["embedding_dim"]
+    seq_length: int = cfg["context_length"]
+    vocabulary_size: int = cfg["vocabulary_size"]
+    dropout_rate: float = cfg["dropout_rate"]
+    num_heads: int = cfg["num_heads"]
+
+     # Initialize model
+    model: TymysLLM = TymysLLM(
+         hidden_dim=hidden_dim,
+         seq_length=seq_length,
+         vocabulary_size=vocabulary_size,
+         dropout_rate=dropout_rate,
+         num_heads=num_heads
     )
 
     # Sets the strategy for decoding
@@ -96,11 +107,16 @@ def main(run_name: str) -> bool:
         topk_k=cfg["top_k"], temperature=cfg["temperature"]
     )
 
+    #Initializes Tokenizer
+    tokenizer: HFBPETokenizer = HFBPETokenizer(
+        tokenizer_path="llm/resources/bpe_tokenizer.json"
+    )
+
     # Initializes text generator based with model initialized
     text_generator: TextGenerator = TextGenerator(
         model=model,
         context_length=cfg["context_length"],
-        encoding=cfg["tiktoken_encoding"],
+        tokenizer=tokenizer,
         decode_strategy=decode_strategy,
     )
 
@@ -114,7 +130,7 @@ def main(run_name: str) -> bool:
 
     with mlflow.start_run(
         run_name=run_name,
-        description="Testing LSTM on RNN"
+        description="Testing TMYTS"
     ):
         mlflow.enable_system_metrics_logging()
 
