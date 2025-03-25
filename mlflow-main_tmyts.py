@@ -23,7 +23,7 @@ from llm.llm.components.decoding_strategies import TopKScaling, \
       AbstractDecodeStrategy
 
 
-def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
+def get_loaders(query: Dict[str, Any] = None, limit: int = 0) -> \
         Tuple[DataLoader, DataLoader]:
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
@@ -34,9 +34,15 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
     # 1.2 Generator to enabling split dataset into train and validation subsets
     generator1: torch.Generator = torch.Generator().manual_seed(918)
 
+    # 1.3 Loads dataset
+    dataset: CrawlDataset = CrawlDataset(
+        client=client, limit=limit, query=query
+    )
+
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
+    logger.info("Splitting dataset into train and validation subsets...")
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client, limit=limit, query=query),
+        dataset,
         [0.9, 0.1],
         generator=generator1,
     )
@@ -44,11 +50,11 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
     # 1.4 Assigns train and validation datasets accordingly
     train_dataset: Subset = datasets[0]
     validation_dataset: Subset = datasets[1]
-
-    # logger.info(f"Configuration cfg type: {cfg.keys()}")
-    # logger.info(f"vocabulary_size: {cfg['vocabulary_size']}")
+    logger.info(f"Train dataset length: {len(train_dataset)}")
+    logger.info(f"Validation dataset length: {len(validation_dataset)}")
 
     # 1.5 Creates train and validation dataloaders
+    logger.info("Creating train and validation dataloaders...")
     train_loader: DataLoader = create_crawl_dataset_loader(
         crawl_dataset=train_dataset,
         batch_size=cfg["batch_size"],
@@ -61,21 +67,21 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
         shuffle=False
     )
 
-    # 1.5 Log their sizes
+    # 1.6 Log their sizes
     logger.info(f"Train loader length: {len(list(train_loader))}")
     logger.info(f"Validation loader length: {len(list(validation_loader))}")
 
     return (train_loader, validation_loader)
 
 
-def main(run_name: str) -> bool:
+def main(run_name: str, limit: int = 0) -> bool:
     # Set the device on which the model will be trained
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # TODO: Add a query to filter the dataset.
     # TODO:Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders()
+    train_loader, validation_loader = get_loaders(limit=limit)
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
@@ -93,7 +99,8 @@ def main(run_name: str) -> bool:
     dropout_rate: float = cfg["dropout_rate"]
     num_heads: int = cfg["num_heads"]
 
-     # Initialize model
+    # Initialize model
+    logger.info("Initializing model...")
     model: TymysLLM = TymysLLM(
          hidden_dim=hidden_dim,
          seq_length=seq_length,
@@ -107,7 +114,7 @@ def main(run_name: str) -> bool:
         topk_k=cfg["top_k"], temperature=cfg["temperature"]
     )
 
-    #Initializes Tokenizer
+    # Initializes Tokenizer
     tokenizer: HFBPETokenizer = HFBPETokenizer(
         tokenizer_path="llm/resources/bpe_tokenizer.json"
     )
@@ -218,7 +225,7 @@ if __name__ == "__main__":
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
-    if not main(run_name):
+    if not main(run_name, limit=0):
         logger.error("Training failed. Exiting.")
         exit(1)
 

@@ -197,5 +197,3 @@ logger.info(f"Initialization configuration is: {init_cfg}")
 
 # Loads configuration
 cfg: Dict[str, Any] = loads_configuration(config_id=init_cfg["collection"])
-
-# TODO: Needs to test the above cfg loader

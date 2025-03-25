@@ -83,6 +83,11 @@ class TrainerV1():
             validation_loader: DataLoader,
             start_context: str
     ) -> Dict[str, List[Any]]:
+
+        # Logs the start of the training
+        logger.info("Starting training...")
+        logger.info(f"Training on {self.device}")
+
         # Initialize training performance parameters stores.
         train_losses, validation_losses = [], []
         track_tokens_seen, texts_generated = [], []
