@@ -81,14 +81,14 @@ class TymysLLM(nn.Module):
         ]))
 
         self.output = nn.Sequential(OrderedDict([
-            ('linear_1', nn.Linear(
+            ('out_linear_1', nn.Linear(
                 self.hidden_size, self.vocabulary_size
             )),
-            ('act_4', nn.GELU()),
-            # ('linear_2', nn.Linear(
-            #     self.vocabulary_size, self.vocabulary_size
-            # )),
-            ('out_act', nn.Sigmoid()),
+            ('out_act_1', nn.GELU()),
+            ('out_linear_2', nn.Linear(
+                self.vocabulary_size, self.vocabulary_size
+            )),
+            ('out_sigmoid', nn.Sigmoid()),
         ]))
 
     def forward(
