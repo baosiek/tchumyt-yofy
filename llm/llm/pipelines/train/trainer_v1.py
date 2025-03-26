@@ -65,7 +65,7 @@ class TrainerV1():
         # # Weather or not to early stop
         # self.early_stopping: bool = early_stopping
         # Initializes early stopping
-        self.early_stop: EarlyStop = None
+        self.early_stop: EarlyStop = early_stopping
         if early_stopping:
             self.early_stop = EarlyStop(
                 patience=self.trainer_cfg["patience"],
