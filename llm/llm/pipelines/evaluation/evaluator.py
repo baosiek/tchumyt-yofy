@@ -32,13 +32,13 @@ class Evaluator():
     def calculate_epoch_loss(
             self,
             data_loader: DataLoader,
-            num_batches: int = None
+            num_batches: int = -1
             ) -> float:
         total_loss: float = 0.0
 
         if len(data_loader) == 0:
             return float("nan")
-        elif num_batches is None:
+        elif num_batches == -1:
             num_batches = len(data_loader)
         else:
             num_batches = min(num_batches, len(data_loader))
