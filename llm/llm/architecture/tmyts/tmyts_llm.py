@@ -27,7 +27,28 @@ class TymysLLM(nn.Module):
             embedding_dim=self.hidden_size
         )
 
-        self.minGRU: minGRU = minGRU(dim=self.hidden_size)
+        self.minGRU_1: minGRU = minGRU(dim=self.hidden_size)
+
+        self.conv1d_1: nn.Conv1d = nn.Conv1d(
+            in_channels=self.hidden_size,
+            out_channels=self.hidden_size,
+            kernel_size=3,
+            padding=1
+        )
+
+        self.conv1d_2: nn.Conv1d = nn.Conv1d(
+            in_channels=self.hidden_size,
+            out_channels=self.hidden_size,
+            kernel_size=3,
+            padding=1
+        )
+
+        self.conv1d_3: nn.Conv1d = nn.Conv1d(
+            in_channels=self.hidden_size,
+            out_channels=self.hidden_size,
+            kernel_size=3,
+            padding=1
+        )
 
         self.drop_embedding: nn.Dropout = nn.Dropout(self.dropout_rate)
         self.drop_rnn: nn.Dropout = nn.Dropout(self.dropout_rate)
@@ -41,6 +62,11 @@ class TymysLLM(nn.Module):
         self.norm2: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
         self.norm3: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
         self.norm4: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
+        self.norm5: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
+
+        self.batch_norm_1: nn.BatchNorm1d = nn.BatchNorm1d(self.hidden_size)
+        self.batch_norm_2: nn.BatchNorm1d = nn.BatchNorm1d(self.hidden_size)
+        self.batch_norm_3: nn.BatchNorm1d = nn.BatchNorm1d(self.hidden_size)
 
         self.multihead_attn = torch.nn.MultiheadAttention(
             embed_dim=self.hidden_size,
@@ -52,43 +78,64 @@ class TymysLLM(nn.Module):
 
         self.mental_model = nn.Sequential(OrderedDict([
             ('linear_1', nn.Linear(self.hidden_size, self.hidden_size)),
-            ('act_1', nn.GELU()),
+            ('act_1', nn.ReLU()),
             ('linear_2', nn.Linear(self.hidden_size, self.hidden_size)),
-            ('act_2', nn.GELU()),
+            ('act_2', nn.ReLU()),
             ('linear_3', nn.Linear(self.hidden_size, self.hidden_size)),
-            ('act_3', nn.GELU()),
+            ('act_3', nn.ReLU()),
             ('linear_4', nn.Linear(self.hidden_size, self.hidden_size)),
-            ('act_4', nn.GELU()),
+            ('act_4', nn.ReLU()),
+            ('linear_5', nn.Linear(self.hidden_size, self.hidden_size)),
+            ('act_5', nn.ReLU()),
+            ('linear_6', nn.Linear(self.hidden_size, self.hidden_size)),
+            ('act_6', nn.ReLU()),
+            ('linear_7', nn.Linear(self.hidden_size, self.hidden_size)),
+            ('act_7', nn.ReLU()),
         ]))
 
         self.grammar_model = nn.Sequential(OrderedDict([
             ('linear_1', nn.Linear(
                 self.hidden_size, self.hidden_size
             )),
-            ('act_1', nn.GELU()),
+            ('act_1', nn.ReLU()),
             ('linear_2', nn.Linear(
                 self.hidden_size, self.hidden_size
             )),
-            ('act_2', nn.GELU()),
+            ('act_2', nn.ReLU()),
             ('linear_3', nn.Linear(
                 self.hidden_size, self.hidden_size
             )),
-            ('act_3', nn.GELU()),
+            ('act_3', nn.ReLU()),
             ('linear_4', nn.Linear(
                 self.hidden_size, self.hidden_size
             )),
-            ('act_4', nn.GELU()),
+            ('act_4', nn.ReLU()),
+            ('linear_5', nn.Linear(
+                self.hidden_size, self.hidden_size
+            )),
+            ('act_5', nn.ReLU()),
+            ('linear_6', nn.Linear(
+                self.hidden_size, self.hidden_size
+            )),
+            ('act_6', nn.ReLU()),
+            ('linear_7', nn.Linear(
+                self.hidden_size, self.hidden_size
+            )),
+            ('act_7', nn.ReLU()),
         ]))
 
         self.output = nn.Sequential(OrderedDict([
             ('out_linear_1', nn.Linear(
-                self.hidden_size, self.vocabulary_size
+                self.hidden_size, self.hidden_size * 2
             )),
-            ('out_act_1', nn.GELU()),
+            ('out_act_1', nn.ReLU()),
             ('out_linear_2', nn.Linear(
-                self.vocabulary_size, self.vocabulary_size
+                self.hidden_size * 2, self.hidden_size * 2
             )),
-            ('out_sigmoid', nn.Sigmoid()),
+            ('out_act_2', nn.ReLU()),
+            ('out_linear_3', nn.Linear(
+                self.hidden_size * 2, self.vocabulary_size
+            )),
         ]))
 
     def forward(
@@ -102,40 +149,53 @@ class TymysLLM(nn.Module):
                                f"Shape of input is: {X.shape}")
 
         # comments
-        X: torch.Tensor = self.embeddings(X)
+        X = self.embeddings(X)
         X = self.drop_embedding(X)
 
         shortcut: torch.Tensor = X
 
-        # X = self.norm0(X)
-        output, hidden_state = self.minGRU(X, return_next_prev_hidden=True)
+        output, hidden_state = self.minGRU_1(X, return_next_prev_hidden=True)
         X = output + hidden_state
         X = self.drop_rnn(X)
         X = X + shortcut
+        X = self.norm0(X)
 
-        # multihead
-        X = self.norm1(X)
+        # multihead attention
         X, _ = self.multihead_attn(X, X, X)
         X = self.drop_att(X)
         X = X + shortcut
+        X = self.norm1(X)
 
         # mental model
-        X_m: torch.Tensor = self.norm2(X)
-        X_m = self.mental_model(X_m)
+        # convolution
+        X_conv: torch.Tensor = X.transpose(1, 2)
+        X_conv = self.conv1d_1(X_conv)
+        X_conv = self.batch_norm_1(X_conv)
+        X_conv = self.conv1d_2(X_conv)
+        X_conv = self.batch_norm_2(X_conv)
+        X_conv = self.conv1d_3(X_conv)
+        X_conv = self.batch_norm_3(X_conv)
+        X_conv = X_conv.transpose(1, 2)
+        X_conv = X + X_conv
+        X_conv = nn.ReLU()(X_conv)
+
+        # mental model
+        X_m: torch.Tensor = self.mental_model(X_conv)
         X_m = self.drop_mental_mlp(X_m)
         X_m = X_m + shortcut
+        X_m = self.norm3(X)
 
         # grammar model
-        X_g: torch.Tensor = self.norm3(X)
-        X_g = self.grammar_model(X_g)
+        X_g: torch.Tensor = self.grammar_model(X)
         X_g = self.drop_grammar_mlp(X_g)
         X_g = X_g + shortcut
+        X_g = self.norm4(X)
 
         # union
         X = X_m + X_g
+        X = self.norm5(X)
 
         # output
-        X = self.norm4(X)
         X = self.output(X)
 
         return X
