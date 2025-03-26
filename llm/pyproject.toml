@@ -20,6 +20,7 @@ mlflow = "^2.20.1"
 tokenizers = "^0.21.1"
 datasets = "^3.4.1"
 pymongo = "^4.11"
+dependency-injector = "^4.46.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^8.3"

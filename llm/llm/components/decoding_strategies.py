@@ -1,6 +1,7 @@
 import torch
 
 from abc import ABC, abstractmethod
+from llm.llm import logger
 
 
 # Define an abstract class as an interface to various decoding strategies
@@ -84,3 +85,22 @@ class TopKScaling(AbstractDecodeStrategy):
         # Draws the next token from a multinomial distribution and
         # returns it
         return torch.multinomial(probabilities, num_samples=1)
+
+
+def get_decoder_factory(
+        strategy: str,
+        temperature: int = 1.0,
+        top_k: int = 1
+) -> AbstractDecodeStrategy:
+
+    if strategy == "greedy_decoding":
+        return GreedyDecoding()
+    elif strategy == "temperature_scaling":
+        return TemperatureScaling(temperature=temperature)
+    elif strategy == "top_k_sampling":
+        return TopKScaling(topk_k=top_k, temperature=temperature)
+    else:
+        logger.error(
+            f"Decoding strategy {strategy} not found."
+        )
+        return None
