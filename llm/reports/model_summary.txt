@@ -6,43 +6,64 @@ TymysLLM                                           --
 ├─minGRU: 1-2                                      --
 │    └─Linear: 2-1                                 2,097,152
 │    └─Identity: 2-2                               --
-├─Dropout: 1-3                                     --
-├─Dropout: 1-4                                     --
-├─Dropout: 1-5                                     --
+├─Conv1d: 1-3                                      3,146,752
+├─Conv1d: 1-4                                      3,146,752
+├─Conv1d: 1-5                                      3,146,752
 ├─Dropout: 1-6                                     --
 ├─Dropout: 1-7                                     --
 ├─Dropout: 1-8                                     --
-├─LayerNorm: 1-9                                   2,048
-├─LayerNorm: 1-10                                  2,048
-├─LayerNorm: 1-11                                  2,048
+├─Dropout: 1-9                                     --
+├─Dropout: 1-10                                    --
+├─Dropout: 1-11                                    --
 ├─LayerNorm: 1-12                                  2,048
 ├─LayerNorm: 1-13                                  2,048
-├─MultiheadAttention: 1-14                         3,145,728
+├─LayerNorm: 1-14                                  2,048
+├─LayerNorm: 1-15                                  2,048
+├─LayerNorm: 1-16                                  2,048
+├─LayerNorm: 1-17                                  2,048
+├─BatchNorm1d: 1-18                                2,048
+├─BatchNorm1d: 1-19                                2,048
+├─BatchNorm1d: 1-20                                2,048
+├─MultiheadAttention: 1-21                         3,145,728
 │    └─NonDynamicallyQuantizableLinear: 2-3        1,048,576
-├─Sequential: 1-15                                 --
+├─Sequential: 1-22                                 --
 │    └─Linear: 2-4                                 1,049,600
-│    └─GELU: 2-5                                   --
+│    └─ReLU: 2-5                                   --
 │    └─Linear: 2-6                                 1,049,600
-│    └─GELU: 2-7                                   --
+│    └─ReLU: 2-7                                   --
 │    └─Linear: 2-8                                 1,049,600
-│    └─GELU: 2-9                                   --
+│    └─ReLU: 2-9                                   --
 │    └─Linear: 2-10                                1,049,600
-│    └─GELU: 2-11                                  --
-├─Sequential: 1-16                                 --
+│    └─ReLU: 2-11                                  --
 │    └─Linear: 2-12                                1,049,600
-│    └─GELU: 2-13                                  --
+│    └─ReLU: 2-13                                  --
 │    └─Linear: 2-14                                1,049,600
-│    └─GELU: 2-15                                  --
+│    └─ReLU: 2-15                                  --
 │    └─Linear: 2-16                                1,049,600
-│    └─GELU: 2-17                                  --
+│    └─ReLU: 2-17                                  --
+├─Sequential: 1-23                                 --
 │    └─Linear: 2-18                                1,049,600
-│    └─GELU: 2-19                                  --
-├─Sequential: 1-17                                 --
-│    └─Linear: 2-20                                38,702,975
-│    └─GELU: 2-21                                  --
-│    └─Sigmoid: 2-22                               --
+│    └─ReLU: 2-19                                  --
+│    └─Linear: 2-20                                1,049,600
+│    └─ReLU: 2-21                                  --
+│    └─Linear: 2-22                                1,049,600
+│    └─ReLU: 2-23                                  --
+│    └─Linear: 2-24                                1,049,600
+│    └─ReLU: 2-25                                  --
+│    └─Linear: 2-26                                1,049,600
+│    └─ReLU: 2-27                                  --
+│    └─Linear: 2-28                                1,049,600
+│    └─ReLU: 2-29                                  --
+│    └─Linear: 2-30                                1,049,600
+│    └─ReLU: 2-31                                  --
+├─Sequential: 1-24                                 --
+│    └─Linear: 2-32                                2,099,200
+│    └─ReLU: 2-33                                  --
+│    └─Linear: 2-34                                4,196,352
+│    └─ReLU: 2-35                                  --
+│    └─Linear: 2-36                                77,368,191
 ===========================================================================
-Total params: 92,066,687
-Trainable params: 92,066,687
+Total params: 152,773,503
+Trainable params: 152,773,503
 Non-trainable params: 0
 ===========================================================================
