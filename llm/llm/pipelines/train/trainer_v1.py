@@ -185,6 +185,7 @@ class TrainerV1():
                             elapsed.days,
                             elapsed.seconds))}"
                         )
+
                     # Resets start_batch chronograph
                     start_batch: datetime.datetime = datetime.datetime.now()
 
