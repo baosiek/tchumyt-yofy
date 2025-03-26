@@ -85,8 +85,7 @@ class TrainerV1():
     ) -> Dict[str, List[Any]]:
 
         # Logs the start of the training
-        logger.info("Starting training...")
-        logger.info(f"Training on {self.device}")
+        logger.info(f"Starting training on {self.device}...")
 
         # Initialize training performance parameters stores.
         train_losses, validation_losses = [], []
@@ -182,7 +181,7 @@ class TrainerV1():
                         f"(Step {global_step:06d}/{total_global_steps:06d}): "
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}, "
-                        f"Elapsed({eval_freq}) {(timedelta(
+                        f"Elapsed eval_freq {(timedelta(
                             elapsed.days,
                             elapsed.seconds))}"
                         )
@@ -192,9 +191,6 @@ class TrainerV1():
             # Computes the time of the end of the epoch
             epoch_end: datetime.timedelta = \
                 datetime.datetime.now() - start_epoch
-
-            # Resets start epochs
-            start_epoch = datetime.datetime.now()
 
             # logs epoch's final losses
             logger.info(
@@ -208,17 +204,6 @@ class TrainerV1():
                     epoch_end.seconds))}"
                 )
 
-            text_generated: str = self.text_generator.generate_text(
-                start_context=start_context
-            )
-
-            # Update texts generated
-            texts_generated.append(text_generated)
-
-            # Logs the generated text
-            logger.info(f"Epoch: {epoch + 1} Text ->"
-                        f"\n[\"{text_generated}\"]")
-
             # saves model.
             self.save_model('llm/models/gpt_model.pth')
 
@@ -230,8 +215,12 @@ class TrainerV1():
                 texts_generated=texts_generated
             )
 
-            # # register the moment epoch finishes
-            # end_epoch: datetime.datetime = datetime.datetime.now()
+            text_generated: str = self.text_generator.generate_text(
+                start_context=start_context
+            )
+
+            # Update texts generated
+            texts_generated.append(text_generated)
 
             # logs epoch processing time
             elapsed_time: datetime.timedelta = \
@@ -242,6 +231,9 @@ class TrainerV1():
                     elapsed_time.days, elapsed_time.seconds
                 )}"
             )
+
+            # Resets start epochs
+            start_epoch = datetime.datetime.now()
 
             # Checks if early stopping is set
             if self.early_stop is not None:
@@ -258,6 +250,10 @@ class TrainerV1():
                 if best_loss > val_loss:
                     self.save_model('llm/models/best_gpt_model.pth')
                     best_loss = val_loss
+
+            # Logs the generated text
+            logger.info(f"Epoch: {epoch + 1} Text ->"
+                        f"\n[\"{text_generated}\"]")
 
         # register the moment epoch finishes
         end_training: datetime.datetime = datetime.datetime.now()
