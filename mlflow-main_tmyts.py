@@ -90,7 +90,8 @@ def main(run_name: str, limit: int = 0) -> bool:
         return False
 
     # Start context
-    start_context: str = "Trump is the president of the"
+    start_context: str = "Trump met for nearly"
+    # two hours with President Joe Biden in the Oval Office
 
     # Gets hyperparameters from configuration file
     hidden_dim: int = cfg["embedding_dim"]
@@ -100,7 +101,6 @@ def main(run_name: str, limit: int = 0) -> bool:
     num_heads: int = cfg["num_heads"]
 
     # Initialize model
-    logger.info("Initializing model...")
     model: TymysLLM = TymysLLM(
          hidden_dim=hidden_dim,
          seq_length=seq_length,
@@ -135,9 +135,11 @@ def main(run_name: str, limit: int = 0) -> bool:
         device=device
     )
 
+    description: str = "Training TMYTS with no minGRU."
+
     with mlflow.start_run(
         run_name=run_name,
-        description="Testing TMYTS"
+        description=description
     ):
         mlflow.enable_system_metrics_logging()
 
@@ -215,17 +217,19 @@ if __name__ == "__main__":
 
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
-    _experiment = mlflow.set_experiment("TMYTS Model")
+    _experiment = mlflow.set_experiment(
+        "TMYTS Model"
+    )
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training 001"
+    run_name = "training 003"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
-    if not main(run_name, limit=0):
+    if not main(run_name, limit=200000):
         logger.error("Training failed. Exiting.")
         exit(1)
 
