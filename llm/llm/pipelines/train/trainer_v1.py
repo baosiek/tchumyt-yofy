@@ -135,7 +135,7 @@ class TrainerV1():
             self.model.train()
 
             # tracks the amount of batches processed
-            start_batch: datetime.datetime = datetime.datetime.now()
+            start_eval_freq: datetime.datetime = datetime.datetime.now()
 
             # For each batch
             for input_batch, target_batch in train_loader:
@@ -159,10 +159,8 @@ class TrainerV1():
                 global_step += 1
                 epoch_batches += 1
 
-                # end of batch
-                elapsed = datetime.datetime.now() - start_batch
-
                 if global_step % eval_freq == 0:
+
                     train_loss, val_loss = self.evaluator.evaluate_model(
                         train_loader=train_loader,
                         validation_loader=validation_loader,
@@ -174,6 +172,9 @@ class TrainerV1():
                     validation_losses.append(val_loss)
                     track_tokens_seen.append(tokens_seen)
 
+                    # end of eval_freq
+                    end_eval_freq = datetime.datetime.now() - start_eval_freq
+
                     # logs the progress
                     logger.info(
                         f"Epoch: {epoch + 1} "
@@ -182,12 +183,13 @@ class TrainerV1():
                         f"Train loss {train_loss:.6f}, "
                         f"Val loss {val_loss:.6f}, "
                         f"Elapsed eval_freq {(timedelta(
-                            elapsed.days,
-                            elapsed.seconds))}"
+                            end_eval_freq.days,
+                            end_eval_freq.seconds))}"
                         )
 
-                    # Resets start_batch chronograph
-                    start_batch: datetime.datetime = datetime.datetime.now()
+                    # Resets eval_freq chronograph
+                    start_eval_freq: datetime.datetime = \
+                        datetime.datetime.now()
 
             # Computes the time of the end of the epoch
             epoch_end: datetime.timedelta = \
