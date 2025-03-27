@@ -11,7 +11,7 @@ from mlflow import MlflowClient
 
 
 from llm.llm import logger, cfg, init_cfg
-from llm.llm.architecture.tmyts.tmyts_llm_explorer import TymysLLM
+from llm.llm.architecture.gpt.gpt_model_v1 import GPTModelV1
 from llm.llm.pipelines.train.trainer_v1 import TrainerV1
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
@@ -97,21 +97,8 @@ def main(
     start_context: str = "Trump met for nearly"
     # two hours with President Joe Biden in the Oval Office
 
-    # Gets hyperparameters from configuration file
-    hidden_dim: int = cfg["embedding_dim"]
-    seq_length: int = cfg["context_length"]
-    vocabulary_size: int = cfg["vocabulary_size"]
-    dropout_rate: float = cfg["dropout_rate"]
-    num_heads: int = cfg["num_heads"]
-
     # Initialize model
-    model: TymysLLM = TymysLLM(
-         hidden_dim=hidden_dim,
-         seq_length=seq_length,
-         vocabulary_size=vocabulary_size,
-         dropout_rate=dropout_rate,
-         num_heads=num_heads
-    )
+    model: GPTModelV1 = GPTModelV1(cfg=init_cfg)
 
     decode_strategy: AbstractDecodeStrategy = get_decoder_factory(
         "greedy_decoding"
