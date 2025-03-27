@@ -33,12 +33,12 @@ class TymysLLM(nn.Module):
         )
 
         self.minGRU_1: minGRU = minGRU(dim=self.hidden_size)
-        # self.gru: nn.GRU = nn.GRU(
-        #     input_size=self.hidden_size,
-        #     hidden_size=self.hidden_size,
-        #     batch_first=True,
-        #     bidirectional=False
-        # )
+        self.drop_gru_1: nn.Dropout = nn.Dropout(self.dropout_rate)
+        self.norm_gru_1: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
+
+        self.minGRU_2: minGRU = minGRU(dim=self.hidden_size)
+        self.drop_gru_2: nn.Dropout = nn.Dropout(self.dropout_rate)
+        self.norm_gru_2: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
 
         self.conv1d_1: nn.Conv1d = nn.Conv1d(
             in_channels=self.hidden_size,
@@ -48,20 +48,21 @@ class TymysLLM(nn.Module):
         )
         self.batch_norm_1: nn.BatchNorm1d = nn.BatchNorm1d(self.hidden_size)
 
-        self.drop_gru_1: nn.Dropout = nn.Dropout(self.dropout_rate)
-        self.norm_1: nn.LayerNorm = nn.LayerNorm(self.hidden_size)
-
         self.output = nn.Sequential(OrderedDict([
             ('out_linear_1', nn.Linear(
                 self.hidden_size, self.hidden_size * 2
             )),
             ('out_act_1', nn.ReLU()),
             ('out_linear_2', nn.Linear(
-                self.hidden_size * 2, self.hidden_size * 2
+                self.hidden_size * 2, self.hidden_size * 4
             )),
             ('out_act_2', nn.ReLU()),
             ('out_linear_3', nn.Linear(
-                self.hidden_size * 2, self.vocabulary_size
+                self.hidden_size * 4, self.hidden_size * 4
+            )),
+            ('out_act_3', nn.ReLU()),
+            ('out_linear_4', nn.Linear(
+                self.hidden_size * 4, self.vocabulary_size
             )),
         ]))
 
@@ -95,7 +96,15 @@ class TymysLLM(nn.Module):
         output, _ = self.minGRU_1(X, return_next_prev_hidden=True)
         X = output
         X = self.drop_gru_1(X)
-        X = self.norm_1(X)
+        X = self.norm_gru_1(X)
+        X = X + shortcut
+
+        shortcut = X
+
+        output, _ = self.minGRU_2(X, return_next_prev_hidden=True)
+        X = output
+        X = self.drop_gru_2(X)
+        X = self.norm_gru_2(X)
         X = X + shortcut
 
         X_conv: torch.Tensor = X.transpose(1, 2)

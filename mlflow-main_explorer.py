@@ -140,8 +140,8 @@ def main(
     )
 
     description: str = '''
-    Training TMYTS with minGRU, conv_1 and Output layer,
-    adding X to the output of GRU
+    Training TMYTS with 2 * minGRU, conv_1 and Output layer
+    (additional linear layer), increasing samples from 15000 to 20000
     '''
 
     with mlflow.start_run(
@@ -203,14 +203,14 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training_run_3"
+    run_name = "training_run_7"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=150000, decode_strategy="greedy_decoding"
+        run_name, limit=20000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())

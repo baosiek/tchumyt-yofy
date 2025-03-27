@@ -6,7 +6,7 @@ from datetime import timedelta
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from llm.llm import logger
 from llm.llm.architecture.abstract_model import AbstractModel
@@ -76,6 +76,21 @@ class TrainerV1():
         logger.info("Trainer initialized with the following configuration:")
         for key in self.trainer_cfg.keys():
             logger.info(f"{key}: {self.trainer_cfg[key]}")
+
+    def evaluate(
+            self,
+            train_loader: DataLoader,
+            validation_loader: DataLoader,
+            eval_iter: int
+            ) -> Tuple[torch.Tensor, torch.Tensor]:
+
+        train_loss, val_loss = self.evaluator.evaluate_model(
+            train_loader=train_loader,
+            validation_loader=validation_loader,
+            eval_iter=eval_iter
+        )
+
+        return train_loss, val_loss
 
     def train(
             self,
@@ -161,7 +176,7 @@ class TrainerV1():
 
                 if global_step % eval_freq == 0:
 
-                    train_loss, val_loss = self.evaluator.evaluate_model(
+                    train_loss, val_loss = self.evaluate(
                         train_loader=train_loader,
                         validation_loader=validation_loader,
                         eval_iter=eval_num_batches
@@ -191,6 +206,13 @@ class TrainerV1():
                     # Resets eval_freq chronograph
                     start_eval_freq: datetime.datetime = \
                         datetime.datetime.now()
+
+            # Epochs last evaluation
+            train_loss, val_loss = self.evaluate(
+                train_loader=train_loader,
+                validation_loader=validation_loader,
+                eval_iter=eval_num_batches
+            )
 
             # Computes the time of the end of the epoch
             epoch_end: datetime.timedelta = \
