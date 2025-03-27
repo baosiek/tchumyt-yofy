@@ -1,6 +1,6 @@
 import mlflow
 import torch
-import os
+# import os
 import shutil
 
 from typing import Any, Dict, List, Tuple
@@ -11,7 +11,7 @@ from mlflow import MlflowClient
 
 
 from llm.llm import logger, cfg, init_cfg
-from llm.llm.architecture.tmyts.tmyts_llm import TymysLLM
+from llm.llm.architecture.tmyts.tmyts_llm_explorer import TymysLLM
 from llm.llm.pipelines.train.trainer_v1 import TrainerV1
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
@@ -78,12 +78,12 @@ def main(
         run_name: str,
         limit: int = 0,
         decode_strategy: str = "greedy_decoding"
-) -> bool:
+) -> str:
     # Set the device on which the model will be trained
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # TODO: Add a query to filter the dataset.
-    # TODO:Must adjust Dataset schema at MongoDB
+    # TODO: Must adjust Dataset schema at MongoDB
     # Get loaders
     train_loader, validation_loader = get_loaders(limit=limit)
 
@@ -135,15 +135,19 @@ def main(
         model=model,
         text_generator=text_generator,
         trainer_cfg=cfg,
-        device=device
+        device=device,
+        to_early_stop=False
     )
 
-    description: str = "Training TMYTS with no minGRU."
+    description: str = '''
+    Training TMYTS with minGRU, conv_1 and Output layer,
+    adding X to the output of GRU
+    '''
 
     with mlflow.start_run(
         run_name=run_name,
         description=description
-    ):
+    ) as run:
         mlflow.enable_system_metrics_logging()
 
         # Logs training parameters
@@ -161,25 +165,15 @@ def main(
             start_context=start_context,
         )
 
+        # Copy the contents of the source file to the destination file
+        shutil.copyfile("llm/logs/training.log", "llm/logs/training_1.log")
+
         # Initialize metrics
         metrics: Dict[str, Any] = {
             "train_loss": train_losses[-1],
             "validation_loss": validation_losses[-1],
             "track_tokens_seen": track_tokens_seen[-1],
         }
-
-        # Log metrics that were calculated during training
-        mlflow.log_metrics(metrics)
-
-        '''
-        While saving the model to MLFlow, the function
-        mlflow.pytorch.log_model() is corrupting the logger
-        file. It will take time to find why and correct it.
-
-        The following code backups the log file as it is now.
-        '''
-        # Copy the contents of the source file to the destination file
-        shutil.copyfile("llm/logs/project.log", "llm/logs/project.bak.log")
 
         # Define an artifact path that the model will be saved to.
         artifact_path_model = f"tchumyt/model/{init_cfg["collection"]}"
@@ -190,28 +184,11 @@ def main(
             registered_model_name=init_cfg["collection"],
         )
 
-        # Recover original log file
-        shutil.copyfile("llm/logs/project.bak.log", "llm/logs/project.log")
+        # Log metrics that were calculated during training
+        mlflow.log_metrics(metrics)
 
-        # Check if the file exists before attempting to delete it
-        if os.path.exists("llm/logs/project.bak.log"):
-            os.remove("llm/logs/project.bak.log")
-
-        # Saves the training log
-        artifact_path_log = "logs"
-        mlflow.log_artifact(
-            "llm/logs/project.log",
-            artifact_path_log
-        )
-
-        # Saves the training performance
-        artifact_path_objects = "objects"
-        mlflow.log_artifact(
-            "llm/pickle_objects/train_tracking_objects.pkl",
-            artifact_path_objects
-        )
-
-    return True
+    run_id: str = run.info.run_id
+    return run_id
 
 
 if __name__ == "__main__":
@@ -221,22 +198,20 @@ if __name__ == "__main__":
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
     _experiment = mlflow.set_experiment(
-        "TMYTS Model"
+        "TMYTS Explorer"
     )
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training_run_1"
+    run_name = "training_run_3"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
-    if not main(
-        run_name, limit=1000, decode_strategy="greedy_decoding"
-    ):
-        logger.error("Training failed. Exiting.")
-        exit(1)
+    run_id: str = main(
+        run_name, limit=150000, decode_strategy="greedy_decoding"
+    )
 
     client = MlflowClient(mlflow.get_tracking_uri())
     model_info = client.get_latest_versions(
@@ -250,6 +225,18 @@ if __name__ == "__main__":
         version=model_info.version,
         key="nlp",
         value="text_generation",
+    )
+
+    logger.info(f"run_id: {run_id}")
+    # # Saves the training log
+    artifact_path_log = "logs"
+    client.log_artifact(
+        run_id,
+        "llm/logs/training_1.log",
+    )
+    client.log_artifact(
+        run_id,
+        "llm/pickle_objects/train_tracking_objects.pkl",
     )
 
     logger.info("The End")

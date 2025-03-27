@@ -35,7 +35,7 @@ class TrainerV1():
             text_generator: TextGenerator,
             trainer_cfg: Dict[str, Any],
             device: str,
-            early_stopping: bool = False
+            to_early_stop: bool = False
             ) -> None:
 
         # Trainer configuration
@@ -65,8 +65,8 @@ class TrainerV1():
         # # Weather or not to early stop
         # self.early_stopping: bool = early_stopping
         # Initializes early stopping
-        self.early_stop: EarlyStop = early_stopping
-        if early_stopping:
+        self.early_stop: EarlyStop = None
+        if to_early_stop:
             self.early_stop = EarlyStop(
                 patience=self.trainer_cfg["patience"],
                 delta=self.trainer_cfg["delta"],
@@ -119,8 +119,8 @@ class TrainerV1():
             start_context=start_context
         )
 
-        logger.info("Text generated before training ->"
-                    f"\n[\"{text_generated}\"]")
+        logger.info("Text generated before training ->")
+        logger.info(f"[{text_generated}]")
 
         # The training loop
         for epoch in range(num_epochs):
@@ -178,11 +178,12 @@ class TrainerV1():
                     # logs the progress
                     logger.info(
                         f"Epoch: {epoch + 1} "
-                        f"({epoch_batches:05d}/{num_batches:05d}) "
-                        f"(Step {global_step:06d}/{total_global_steps:06d}): "
-                        f"Train loss {train_loss:.6f}, "
-                        f"Val loss {val_loss:.6f}, "
-                        f"Elapsed eval_freq {(timedelta(
+                        f"({epoch_batches:06d}/{num_batches:06d}) "
+                        f"(Global {global_step:07d}/"
+                        f"{total_global_steps:07d}): "
+                        f"Train loss {train_loss:12.8f}, "
+                        f"Val loss {val_loss:12.8f}, "
+                        f"Elapsed eval_freq {str(timedelta(
                             end_eval_freq.days,
                             end_eval_freq.seconds))}"
                         )
@@ -198,11 +199,11 @@ class TrainerV1():
             # logs epoch's final losses
             logger.info(
                 f"Final Epoch: {epoch + 1} "
-                f"({epoch_batches:05d}/{num_batches:05d}) "
-                f"(Step {global_step + 1:06d}/{total_global_steps:06d}): "
-                f"Train loss {train_loss:.6f}, "
-                f"Val loss {val_loss:.6f} ,"
-                f"Elapsed {(timedelta(
+                f"({epoch_batches:06d}/{num_batches:06d}) "
+                f"(Global {global_step + 1:07d}/{total_global_steps:07d}): "
+                f"Train loss {train_loss:12.8f}, "
+                f"Val loss {val_loss:12.8f} ,"
+                f"Elapsed {str(timedelta(
                     epoch_end.days,
                     epoch_end.seconds))}"
                 )
@@ -230,9 +231,9 @@ class TrainerV1():
                 datetime.datetime.now() - start_epoch
             logger.info(
                 f"Epoch: {epoch + 1} "
-                f"Processing time: {datetime.timedelta(
+                f"Processing time: {str(datetime.timedelta(
                     elapsed_time.days, elapsed_time.seconds
-                )}"
+                ))}"
             )
 
             # Resets start epochs
@@ -255,8 +256,8 @@ class TrainerV1():
                     best_loss = val_loss
 
             # Logs the generated text
-            logger.info(f"Epoch: {epoch + 1} Text ->"
-                        f"\n[\"{text_generated}\"]")
+            logger.info(f"Epoch: {epoch + 1} Text ->")
+            logger.info(f"[{text_generated}]")
 
         # register the moment epoch finishes
         end_training: datetime.datetime = datetime.datetime.now()

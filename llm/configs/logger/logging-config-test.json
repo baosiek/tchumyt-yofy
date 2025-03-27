@@ -23,7 +23,7 @@
         },
         "file_handler": {
             "class": "logging.FileHandler",
-            "filename": "llm/logs/project.log",
+            "filename": "llm/logs/training.log",
             "formatter": "standard",
             "level": "DEBUG",
             "mode": "w",
