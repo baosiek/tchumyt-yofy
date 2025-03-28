@@ -101,16 +101,14 @@ def main(
     hidden_dim: int = cfg["embedding_dim"]
     seq_length: int = cfg["context_length"]
     vocabulary_size: int = cfg["vocabulary_size"]
-    dropout_rate: float = cfg["dropout_rate"]
-    num_heads: int = cfg["num_heads"]
+    dropout_rate: float = cfg["drop_rate"]
 
     # Initialize model
     model: TymysLLM = TymysLLM(
          hidden_dim=hidden_dim,
          seq_length=seq_length,
          vocabulary_size=vocabulary_size,
-         dropout_rate=dropout_rate,
-         num_heads=num_heads
+         dropout_rate=dropout_rate
     )
 
     decode_strategy: AbstractDecodeStrategy = get_decoder_factory(
@@ -140,8 +138,8 @@ def main(
     )
 
     description: str = '''
-    Training TMYTS with 2 * minGRU, conv_1 and Output layer
-    (additional linear layer), increasing samples from 15000 to 20000
+    Training TMYTS with minGRU, conv_1,Grammar module (* 8), Output layer
+    Output layer with no additional layer
     '''
 
     with mlflow.start_run(
@@ -203,14 +201,14 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training_run_7"
+    run_name = "training_run_14"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=20000, decode_strategy="greedy_decoding"
+        run_name, limit=30000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())

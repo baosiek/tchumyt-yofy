@@ -3,7 +3,7 @@ import torch.nn as nn
 
 from typing import Dict, Any
 
-from llm.llm.architecture.gpt.feed_forward import FeedForward
+from llm.llm.architecture.gpt.feed_forward_v1 import FeedForwardV1
 
 
 class TransformerBlockV1(nn.Module):
@@ -29,7 +29,7 @@ class TransformerBlockV1(nn.Module):
             )
 
         # Initializes the feed forward layer
-        self.ff: FeedForward = FeedForward(cfg=cfg)
+        self.ff: FeedForwardV1 = FeedForwardV1(cfg=cfg)
 
         # Initialized the normalization layers
         self.norm1: nn.LayerNorm = nn.LayerNorm(cfg['embedding_dimension'])

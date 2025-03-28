@@ -4,7 +4,7 @@ import torch.nn as nn
 from typing import Any, Dict
 
 from llm.llm.architecture.gpt.positional_encoding import PositionalEncoding
-from llm.llm.architecture.gpt.transformer_block import TransformerBlock
+from llm.llm.architecture.gpt.transformer_block_v1 import TransformerBlockV1
 
 
 class GPTModelV1(nn.Module):
@@ -35,7 +35,7 @@ class GPTModelV1(nn.Module):
 
         # The transformer block layer
         self.transformer_blocks: nn.Sequential = nn.Sequential(
-            *[TransformerBlock(cfg=cfg) for _ in range(
+            *[TransformerBlockV1(cfg=cfg) for _ in range(
                 cfg['number_layers']
             )]
         )

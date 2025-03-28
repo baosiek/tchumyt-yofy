@@ -1,6 +1,5 @@
 import mlflow
 import torch
-# import os
 import shutil
 
 from typing import Any, Dict, List, Tuple
@@ -91,17 +90,17 @@ def main(
         logger.error(
             "Train loader and/or validation loader is empty."
         )
-        return False
+        raise ValueError("train loader and/or validation loader is empty")
 
     # Start context
-    start_context: str = "Trump met for nearly"
+    start_context: str = init_cfg["start_context"]
     # two hours with President Joe Biden in the Oval Office
 
     # Initialize model
-    model: GPTModelV1 = GPTModelV1(cfg=init_cfg)
+    model: GPTModelV1 = GPTModelV1(cfg=cfg)
 
     decode_strategy: AbstractDecodeStrategy = get_decoder_factory(
-        "greedy_decoding"
+        decode_strategy
     )
 
     # Initializes Tokenizer
@@ -126,10 +125,7 @@ def main(
         to_early_stop=False
     )
 
-    description: str = '''
-    Training TMYTS with 2 * minGRU, conv_1 and Output layer
-    (additional linear layer), increasing samples from 15000 to 20000
-    '''
+    description: str = init_cfg["description"]
 
     with mlflow.start_run(
         run_name=run_name,
@@ -180,24 +176,22 @@ def main(
 
 if __name__ == "__main__":
     # Use the fluent API to set the tracking uri and the active experiment
-    mlflow.set_tracking_uri("http://127.0.0.1:5000")
+    mlflow.set_tracking_uri(init_cfg["mlflow_track_uri"])
 
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
     _experiment = mlflow.set_experiment(
-        "TMYTS Explorer"
+        init_cfg["experiment"]
     )
-
-    # Define a run name for this iteration of training.
-    # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training_run_7"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=20000, decode_strategy="greedy_decoding"
+        run_name=init_cfg["run_name"],
+        limit=init_cfg["limit"],
+        decode_strategy=init_cfg["decode_strategy"]
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())
