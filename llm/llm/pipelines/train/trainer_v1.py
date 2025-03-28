@@ -130,18 +130,22 @@ class TrainerV1():
         # Total global steps
         total_global_steps: int = num_batches * num_epochs
 
-        # Evaluates the model before training, just for fun
+        # Generated text before training
+        text_generated: str = self.text_generator.generate_text(
+            start_context=start_context
+        )
+
+        logger.info("Text generated before training ->")
+        logger.info(f"[{text_generated}]")
+
+        # Evaluates the model before training and logs result just for fun
         train_loss, val_loss = self.evaluate(
             train_loader=train_loader,
             validation_loader=validation_loader,
             eval_iter=eval_num_batches
         )
 
-        # end of eval_freq
-        now: datetime.datetime = datetime.datetime.now()
-        now_diff = now - now
-
-        # logs the progress
+        # logs the first loss with untrained model
         logger.info(
             f"Epoch: {0} "
             f"({0:06d}/{num_batches:06d}) "
@@ -150,17 +154,9 @@ class TrainerV1():
             f"Train loss {train_loss:12.8f}, "
             f"Val loss {val_loss:12.8f}, "
             f"Time eval_freq {str(timedelta(
-                now_diff.days,
-                now_diff.seconds))}"
+                datetime.timedelta(days=0, seconds=0).days,
+                datetime.timedelta(days=0, seconds=0).seconds))}"
             )
-
-        # Generated text before training
-        text_generated: str = self.text_generator.generate_text(
-            start_context=start_context
-        )
-
-        logger.info("Text generated before training ->")
-        logger.info(f"[{text_generated}]")
 
         # The training loop
         for epoch in range(num_epochs):
