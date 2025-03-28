@@ -22,6 +22,7 @@ class Evaluator():
         target_batch: torch.Tensor = target_batch.to(device=self.device)
 
         logits: torch.Tensor = self.model(input_batch)
+
         loss: torch.Tensor = torch.nn.functional.cross_entropy(
             logits.flatten(0, 1),
             target_batch.flatten()

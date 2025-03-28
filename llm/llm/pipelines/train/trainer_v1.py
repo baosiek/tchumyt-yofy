@@ -1,6 +1,7 @@
 import datetime
 import torch
 import pickle
+import mlflow
 
 from datetime import timedelta
 from torch.utils.data import DataLoader
@@ -129,6 +130,30 @@ class TrainerV1():
         # Total global steps
         total_global_steps: int = num_batches * num_epochs
 
+        # Evaluates the model before training, just for fun
+        train_loss, val_loss = self.evaluate(
+            train_loader=train_loader,
+            validation_loader=validation_loader,
+            eval_iter=eval_num_batches
+        )
+
+        # end of eval_freq
+        now: datetime.datetime = datetime.datetime.now()
+        now_diff = now - now
+
+        # logs the progress
+        logger.info(
+            f"Epoch: {0} "
+            f"({0:06d}/{num_batches:06d}) "
+            f"(Global {global_step + 1:07d}/"
+            f"{total_global_steps:07d}): "
+            f"Train loss {train_loss:12.8f}, "
+            f"Val loss {val_loss:12.8f}, "
+            f"Time eval_freq {str(timedelta(
+                now_diff.days,
+                now_diff.seconds))}"
+            )
+
         # Generated text before training
         text_generated: str = self.text_generator.generate_text(
             start_context=start_context
@@ -182,6 +207,8 @@ class TrainerV1():
                         eval_iter=eval_num_batches
                     )
 
+                    mlflow.log_metric("validation_loss", val_loss)
+
                     # updates training performance data
                     train_losses.append(train_loss)
                     validation_losses.append(val_loss)
@@ -194,11 +221,11 @@ class TrainerV1():
                     logger.info(
                         f"Epoch: {epoch + 1} "
                         f"({epoch_batches:06d}/{num_batches:06d}) "
-                        f"(Global {global_step:07d}/"
+                        f"(Global {global_step + 1:07d}/"
                         f"{total_global_steps:07d}): "
                         f"Train loss {train_loss:12.8f}, "
                         f"Val loss {val_loss:12.8f}, "
-                        f"Elapsed eval_freq {str(timedelta(
+                        f"Time eval_freq {str(timedelta(
                             end_eval_freq.days,
                             end_eval_freq.seconds))}"
                         )
@@ -225,7 +252,7 @@ class TrainerV1():
                 f"(Global {global_step + 1:07d}/{total_global_steps:07d}): "
                 f"Train loss {train_loss:12.8f}, "
                 f"Val loss {val_loss:12.8f} ,"
-                f"Elapsed {str(timedelta(
+                f"Time {str(timedelta(
                     epoch_end.days,
                     epoch_end.seconds))}"
                 )

@@ -9,23 +9,28 @@ TymysLLM                                 --
 │    └─Identity: 2-2                     --
 ├─Dropout: 1-4                           --
 ├─LayerNorm: 1-5                         2,048
-├─minGRU: 1-6                            --
-│    └─Linear: 2-3                       2,097,152
-│    └─Identity: 2-4                     --
-├─Dropout: 1-7                           --
-├─LayerNorm: 1-8                         2,048
-├─Conv1d: 1-9                            3,146,752
-├─BatchNorm1d: 1-10                      2,048
-├─Sequential: 1-11                       --
-│    └─Linear: 2-5                       2,099,200
+├─Conv1d: 1-6                            3,146,752
+├─BatchNorm1d: 1-7                       2,048
+├─Sequential: 1-8                        --
+│    └─Linear: 2-3                       2,099,200
+│    └─ReLU: 2-4                         --
+│    └─Linear: 2-5                       8,392,704
 │    └─ReLU: 2-6                         --
-│    └─Linear: 2-7                       8,392,704
+│    └─Linear: 2-7                       33,562,624
 │    └─ReLU: 2-8                         --
-│    └─Linear: 2-9                       16,781,312
+│    └─Linear: 2-9                       67,117,056
 │    └─ReLU: 2-10                        --
-│    └─Linear: 2-11                      154,698,623
+│    └─Linear: 2-11                      33,558,528
+│    └─ReLU: 2-12                        --
+│    └─Linear: 2-13                      8,390,656
+│    └─ReLU: 2-14                        --
+│    └─Linear: 2-15                      2,098,176
+│    └─ReLU: 2-16                        --
+├─Dropout: 1-9                           --
+├─Sequential: 1-10                       --
+│    └─Linear: 2-17                      38,702,975
 =================================================================
-Total params: 228,049,791
-Trainable params: 228,049,791
+Total params: 237,900,671
+Trainable params: 237,900,671
 Non-trainable params: 0
 =================================================================

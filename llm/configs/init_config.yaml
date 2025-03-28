@@ -3,6 +3,13 @@ mongo_port: "30018"
 dataset: "models_data"
 collection: "TMYTS_0_0"
 data_config_id: "TMYTS_PIPELINE"
+mlflow_track_uri: "http://127.0.0.1:5000"
+experiment: "TMYTS Explorer"
+run_name: "training_run_9"
+limit: 20000
+decode_strategy: "greedy_decoding"
+start_context: "Trump met for nearly"
+description: "Training TMYTS with 2 * minGRU, conv_1 and Output layer (additional linear layer), increasing samples from 15000 to 20000"
 
 # collection above is both the name of the collection
 # with the data to train the model as it is also
