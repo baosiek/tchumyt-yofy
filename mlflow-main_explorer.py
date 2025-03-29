@@ -200,14 +200,14 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training_run_21"
+    run_name = "training_run_22"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=40000, decode_strategy="greedy_decoding"
+        run_name, limit=512000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())
@@ -224,7 +224,6 @@ if __name__ == "__main__":
         value="text_generation",
     )
 
-    logger.info(f"run_id: {run_id}")
     # # Saves the training log
     artifact_path_log = "logs"
     client.log_artifact(
