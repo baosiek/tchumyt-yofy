@@ -207,7 +207,7 @@ if __name__ == "__main__":
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=512000, decode_strategy="greedy_decoding"
+        run_name, limit=1024000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())
