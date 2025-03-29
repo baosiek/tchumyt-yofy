@@ -22,6 +22,8 @@ from llm.llm.pipelines.data_ingestion.data_loader import \
 from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
     get_decoder_factory
 
+# mlflow.enable_system_metrics_logging()
+
 
 def get_loaders(query: Dict[str, Any] = None, limit: int = 0) -> \
         Tuple[DataLoader, DataLoader]:
@@ -138,15 +140,13 @@ def main(
     )
 
     description: str = '''
-    Training TMYTS with minGRU, conv_1,Grammar module (* 8), Output layer
-    Output layer with no additional layer
+    Added fourth conv block
     '''
 
     with mlflow.start_run(
         run_name=run_name,
         description=description
     ) as run:
-        mlflow.enable_system_metrics_logging()
 
         # Logs training parameters
         mlflow.log_params(cfg)
@@ -157,7 +157,8 @@ def main(
 
         mlflow.log_artifact("llm/reports/model_summary.txt")
 
-        train_losses, validation_losses, track_tokens_seen, _ = trainer.train(
+        # Starts the training
+        _, _, track_tokens_seen, _ = trainer.train(
             train_loader=train_loader,
             validation_loader=validation_loader,
             start_context=start_context,
@@ -165,13 +166,6 @@ def main(
 
         # Copy the contents of the source file to the destination file
         shutil.copyfile("llm/logs/training.log", "llm/logs/training_1.log")
-
-        # Initialize metrics
-        metrics: Dict[str, Any] = {
-            "train_loss": train_losses[-1],
-            "validation_loss": validation_losses[-1],
-            "track_tokens_seen": track_tokens_seen[-1],
-        }
 
         # Define an artifact path that the model will be saved to.
         artifact_path_model = f"tchumyt/model/{init_cfg["collection"]}"
@@ -181,6 +175,11 @@ def main(
             artifact_path=artifact_path_model,
             registered_model_name=init_cfg["collection"],
         )
+
+        # Initialize metrics
+        metrics: Dict[str, Any] = {
+            "track_tokens_seen": track_tokens_seen[-1],
+        }
 
         # Log metrics that were calculated during training
         mlflow.log_metrics(metrics)
@@ -201,14 +200,14 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training_run_14"
+    run_name = "training_run_21"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=30000, decode_strategy="greedy_decoding"
+        run_name, limit=40000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())
