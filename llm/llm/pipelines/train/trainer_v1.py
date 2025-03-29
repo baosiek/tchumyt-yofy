@@ -14,6 +14,7 @@ from llm.llm.architecture.abstract_model import AbstractModel
 from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.early_stop import EarlyStop
+from llm.llm.utils.format_timedelta import format_time_delta
 
 """
 This Trainer class is responsible for thr whole training pipeline
@@ -109,7 +110,7 @@ class TrainerV1():
         start_training: datetime.datetime = datetime.datetime.now()
 
         # Initialize training progress tracking variables
-        tokens_seen, global_step = 0, -1
+        tokens_seen, global_step = 0, 0
         best_loss: float = None
 
         if self.early_stop is None:
@@ -145,17 +146,20 @@ class TrainerV1():
             eval_iter=eval_num_batches
         )
 
+        mlflow.log_metric("train_loss", train_loss, step=0)
+        mlflow.log_metric("val_loss", val_loss, step=0)
+
         # logs the first loss with untrained model
         logger.info(
-            f"Epoch: {0} "
+            f"No Train:"
             f"({0:06d}/{num_batches:06d}) "
-            f"(Global {global_step + 1:07d}/"
+            f"(Global {global_step:07d}/"
             f"{total_global_steps:07d}): "
             f"Train loss {train_loss:12.8f}, "
             f"Val loss {val_loss:12.8f}, "
-            f"Time eval_freq {str(timedelta(
-                datetime.timedelta(days=0, seconds=0).days,
-                datetime.timedelta(days=0, seconds=0).seconds))}"
+            f"Time eval_freq {format_time_delta(
+                datetime.timedelta(days=0, seconds=0)
+            )}"
             )
 
         # The training loop
@@ -203,7 +207,8 @@ class TrainerV1():
                         eval_iter=eval_num_batches
                     )
 
-                    mlflow.log_metric("validation_loss", val_loss)
+                    mlflow.log_metric("train_loss", train_loss, step=epoch)
+                    mlflow.log_metric("val_loss", val_loss, step=epoch)
 
                     # updates training performance data
                     train_losses.append(train_loss)
@@ -211,19 +216,17 @@ class TrainerV1():
                     track_tokens_seen.append(tokens_seen)
 
                     # end of eval_freq
-                    end_eval_freq = datetime.datetime.now() - start_eval_freq
+                    end_eval_freq: datetime.timedelta = datetime.datetime.now() - start_eval_freq
 
                     # logs the progress
                     logger.info(
                         f"Epoch: {epoch + 1} "
                         f"({epoch_batches:06d}/{num_batches:06d}) "
-                        f"(Global {global_step + 1:07d}/"
+                        f"(Global {global_step:07d}/"
                         f"{total_global_steps:07d}): "
                         f"Train loss {train_loss:12.8f}, "
                         f"Val loss {val_loss:12.8f}, "
-                        f"Time eval_freq {str(timedelta(
-                            end_eval_freq.days,
-                            end_eval_freq.seconds))}"
+                        f"Time eval_freq {format_time_delta(end_eval_freq)}"
                         )
 
                     # Resets eval_freq chronograph
@@ -245,12 +248,10 @@ class TrainerV1():
             logger.info(
                 f"Final Epoch: {epoch + 1} "
                 f"({epoch_batches:06d}/{num_batches:06d}) "
-                f"(Global {global_step + 1:07d}/{total_global_steps:07d}): "
+                f"(Global {global_step:07d}/{total_global_steps:07d}): "
                 f"Train loss {train_loss:12.8f}, "
                 f"Val loss {val_loss:12.8f} ,"
-                f"Time {str(timedelta(
-                    epoch_end.days,
-                    epoch_end.seconds))}"
+                f"Time {format_time_delta(epoch_end)}"
                 )
 
             # saves model.
@@ -276,9 +277,7 @@ class TrainerV1():
                 datetime.datetime.now() - start_epoch
             logger.info(
                 f"Epoch: {epoch + 1} "
-                f"Processing time: {str(datetime.timedelta(
-                    elapsed_time.days, elapsed_time.seconds
-                ))}"
+                f"Processing time: {format_time_delta(elapsed_time)}"
             )
 
             # Resets start epochs
@@ -311,10 +310,7 @@ class TrainerV1():
         elapsed_time = end_training - start_training
 
         logger.info(
-            f"Training processing time: {datetime.timedelta(
-                elapsed_time.days,
-                elapsed_time.seconds
-            )}"
+            f"Training processing time: {format_time_delta(elapsed_time)}"
         )
 
         return train_losses, validation_losses, \
@@ -343,3 +339,4 @@ class TrainerV1():
             pickle.dump(objects_to_serialize, file=file)
 
         logger.info(f"Tracking objects saved at : {path_name}")
+
