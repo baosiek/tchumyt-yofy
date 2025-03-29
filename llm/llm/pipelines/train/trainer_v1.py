@@ -3,7 +3,6 @@ import torch
 import pickle
 import mlflow
 
-from datetime import timedelta
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 
@@ -216,7 +215,8 @@ class TrainerV1():
                     track_tokens_seen.append(tokens_seen)
 
                     # end of eval_freq
-                    end_eval_freq: datetime.timedelta = datetime.datetime.now() - start_eval_freq
+                    end_eval_freq: datetime.timedelta = \
+                        datetime.datetime.now() - start_eval_freq
 
                     # logs the progress
                     logger.info(
@@ -307,7 +307,7 @@ class TrainerV1():
         end_training: datetime.datetime = datetime.datetime.now()
 
         # logs epoch processing time
-        elapsed_time = end_training - start_training
+        elapsed_time: datetime.timedelta = end_training - start_training
 
         logger.info(
             f"Training processing time: {format_time_delta(elapsed_time)}"
@@ -339,4 +339,3 @@ class TrainerV1():
             pickle.dump(objects_to_serialize, file=file)
 
         logger.info(f"Tracking objects saved at : {path_name}")
-
