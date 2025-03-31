@@ -16,7 +16,7 @@ class TymysLLM(nn.Module):
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.hidden_size: int = hidden_dim
-        self.seq_length: int = seq_length
+        self.seq_length: int = seq_length  # used only for positional embedding
         self.vocabulary_size: int = vocabulary_size
         self.dropout_rate: float = dropout_rate
 
@@ -25,10 +25,10 @@ class TymysLLM(nn.Module):
             embedding_dim=self.hidden_size
         )
 
-        self.pos_embedding_layer: nn.Embedding = nn.Embedding(
-            num_embeddings=self.seq_length,
-            embedding_dim=self.hidden_size
-        )
+        # self.pos_embedding_layer: nn.Embedding = nn.Embedding(
+        #     num_embeddings=self.seq_length,
+        #     embedding_dim=self.hidden_size
+        # )
 
         self.minGRU_1: minGRU = minGRU(dim=self.hidden_size)
         self.drop_gru_1: nn.Dropout = nn.Dropout(self.dropout_rate)

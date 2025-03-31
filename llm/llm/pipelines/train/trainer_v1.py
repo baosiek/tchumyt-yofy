@@ -14,6 +14,7 @@ from llm.llm.pipelines.evaluation.evaluator import Evaluator
 from llm.llm.pipelines.inference.text_generator import TextGenerator
 from llm.llm.pipelines.train.early_stop import EarlyStop
 from llm.llm.utils.format_timedelta import format_time_delta
+from llm.llm.utils.commons import filter_string
 
 """
 This Trainer class is responsible for thr whole training pipeline
@@ -136,7 +137,7 @@ class TrainerV1():
         )
 
         logger.info("Text generated before training ->")
-        logger.info(f"[{text_generated}]")
+        logger.info(f"[{filter_string(text_generated)}]")
 
         # Evaluates the model before training and logs result just for fun
         train_loss, val_loss = self.evaluate(
@@ -301,7 +302,7 @@ class TrainerV1():
 
             # Logs the generated text
             logger.info(f"Epoch: {epoch + 1} Text ->")
-            logger.info(f"[{text_generated}]")
+            logger.info(f"[{filter_string(text_generated)}]")
 
         # register the moment epoch finishes
         end_training: datetime.datetime = datetime.datetime.now()

@@ -2,7 +2,7 @@
     "config_id": "TMYTS_PIPELINE",
     "description": "This is the configuration tio run TMYTS_PIPELINE on beam",
     "cfg": {
-        "model_cfg_id": "GPT_0_0",
+        "model_cfg_id": "TMYTS_0_0",
         "data_source": {
             "database": "nlp_data",
             "collection": "trump_data"
