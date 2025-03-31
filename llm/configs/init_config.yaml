@@ -1,7 +1,7 @@
 mongo_host: "www.mongo.ca"
 mongo_port: "30018"
 dataset: "models_data"
-collection: "TMYTS_0_0"
+collection: "TMYTS_0_1"
 data_config_id: "TMYTS_PIPELINE"
 mlflow_track_uri: "http://127.0.0.1:5000"
 experiment: "TMYTS Explorer"
