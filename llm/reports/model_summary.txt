@@ -8,42 +8,43 @@ TymysLLM                                 --
 │    └─Identity: 2-2                     --
 ├─Dropout: 1-3                           --
 ├─LayerNorm: 1-4                         2,304
-├─Conv1d: 1-5                            3,982,464
-├─BatchNorm1d: 1-6                       2,304
-├─Sequential: 1-7                        --
-│    └─Linear: 2-3                       5,313,024
-│    └─GELU: 2-4                         --
-│    └─Linear: 2-5                       5,309,568
-│    └─GELU: 2-6                         --
-├─Dropout: 1-8                           --
-├─Conv1d: 1-9                            3,982,464
-├─BatchNorm1d: 1-10                      2,304
-├─Sequential: 1-11                       --
-│    └─Linear: 2-7                       5,313,024
-│    └─GELU: 2-8                         --
-│    └─Linear: 2-9                       5,309,568
-│    └─GELU: 2-10                        --
-├─Dropout: 1-12                          --
-├─Conv1d: 1-13                           3,982,464
-├─BatchNorm1d: 1-14                      2,304
-├─Sequential: 1-15                       --
-│    └─Linear: 2-11                      5,313,024
-│    └─GELU: 2-12                        --
-│    └─Linear: 2-13                      5,309,568
-│    └─GELU: 2-14                        --
-├─Dropout: 1-16                          --
-├─Sequential: 1-17                       --
-│    └─Linear: 2-15                      2,656,512
-│    └─GELU: 2-16                        --
-│    └─Linear: 2-17                      10,621,440
-│    └─GELU: 2-18                        --
-│    └─Linear: 2-19                      21,238,272
-│    └─GELU: 2-20                        --
-│    └─Linear: 2-21                      10,619,136
-│    └─GELU: 2-22                        --
-│    └─Linear: 2-23                      87,034,495
+├─Sequential: 1-5                        --
+│    └─Conv1DBlock: 2-3                  --
+│    │    └─Conv1d: 3-1                  3,982,464
+│    │    └─BatchNorm1d: 3-2             2,304
+│    │    └─LayerNorm: 3-3               2,304
+│    │    └─ReLU: 3-4                    --
+│    │    └─Dropout: 3-5                 --
+│    │    └─FeedForward: 3-6             10,622,592
+│    │    └─Dropout: 3-7                 --
+│    └─Conv1DBlock: 2-4                  --
+│    │    └─Conv1d: 3-8                  3,982,464
+│    │    └─BatchNorm1d: 3-9             2,304
+│    │    └─LayerNorm: 3-10              2,304
+│    │    └─ReLU: 3-11                   --
+│    │    └─Dropout: 3-12                --
+│    │    └─FeedForward: 3-13            10,622,592
+│    │    └─Dropout: 3-14                --
+│    └─Conv1DBlock: 2-5                  --
+│    │    └─Conv1d: 3-15                 3,982,464
+│    │    └─BatchNorm1d: 3-16            2,304
+│    │    └─LayerNorm: 3-17              2,304
+│    │    └─ReLU: 3-18                   --
+│    │    └─Dropout: 3-19                --
+│    │    └─FeedForward: 3-20            10,622,592
+│    │    └─Dropout: 3-21                --
+├─Sequential: 1-6                        --
+│    └─Linear: 2-6                       2,656,512
+│    └─GELU: 2-7                         --
+│    └─Linear: 2-8                       10,621,440
+│    └─GELU: 2-9                         --
+│    └─Linear: 2-10                      21,238,272
+│    └─GELU: 2-11                        --
+│    └─Linear: 2-12                      10,619,136
+│    └─GELU: 2-13                        --
+│    └─Linear: 2-14                      87,034,495
 =================================================================
-Total params: 222,146,815
-Trainable params: 222,146,815
+Total params: 222,153,727
+Trainable params: 222,153,727
 Non-trainable params: 0
 =================================================================

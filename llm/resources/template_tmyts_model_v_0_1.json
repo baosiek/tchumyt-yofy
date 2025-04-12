@@ -1,8 +1,8 @@
 {
-    "config_id": "TMYTS_0_1",
+    "config_id": "TMYTS_0_2",
     "name": "TMYTSModel",
     "type": "FFW",
-    "version": "0.0",
+    "version": "0.2",
     "description": "TMYTS model with adjusted context and embedding_dim",
     "cfg": {
         "vocabulary_size": 37759,
@@ -19,6 +19,9 @@
         "top_k": 3,
         "stride": 32,
         "drop_rate": 0.5,
-        "weight_decay": 0.1
+        "weight_decay": 0.1,
+        "num_layers": 3,
+        "model_stride": 1,
+        "kernel_size": 3
     }
 }

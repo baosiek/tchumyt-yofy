@@ -42,7 +42,7 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = 0) -> \
     logger.info("Splitting dataset into train and validation subsets...")
     datasets: List[Subset] = torch.utils.data.random_split(
         dataset,
-        [0.9, 0.1],
+        [0.99, 0.01],
         generator=generator1,
     )
 
@@ -129,7 +129,8 @@ def main(
 
     with mlflow.start_run(
         run_name=run_name,
-        description=description
+        description=description,
+        log_system_metrics=True
     ) as run:
         mlflow.enable_system_metrics_logging()
 
@@ -151,12 +152,18 @@ def main(
         # Copy the contents of the source file to the destination file
         shutil.copyfile("llm/logs/training.log", "llm/logs/training_1.log")
 
-        # Initialize metrics
-        metrics: Dict[str, Any] = {
-            "train_loss": train_losses[-1],
-            "validation_loss": validation_losses[-1],
-            "track_tokens_seen": track_tokens_seen[-1],
-        }
+        # TODO: BUG MLFLOW is deleting the following objects after 
+        # training ends
+        if train_losses and validation_losses and track_tokens_seen:                    
+            # Initialize metrics
+            metrics: Dict[str, Any] = {
+                "train_loss": train_losses[-1],
+                "validation_loss": validation_losses[-1],
+                "track_tokens_seen": track_tokens_seen[-1],
+            }
+
+            # Log metrics that were calculated during training
+            mlflow.log_metrics(metrics)
 
         # Define an artifact path that the model will be saved to.
         artifact_path_model = f"tchumyt/model/{init_cfg["collection"]}"
@@ -167,14 +174,16 @@ def main(
             registered_model_name=init_cfg["collection"],
         )
 
-        # Log metrics that were calculated during training
-        mlflow.log_metrics(metrics)
 
-    run_id: str = run.info.run_id
-    return run_id
+
+    # Clear GPU cache
+    torch.cuda.empty_cache()
+    
+    return run.info.run_id
 
 
 if __name__ == "__main__":
+
     # Use the fluent API to set the tracking uri and the active experiment
     mlflow.set_tracking_uri(init_cfg["mlflow_track_uri"])
 
@@ -208,7 +217,6 @@ if __name__ == "__main__":
         value="text_generation",
     )
 
-    logger.info(f"run_id: {run_id}")
     # # Saves the training log
     artifact_path_log = "logs"
     client.log_artifact(
