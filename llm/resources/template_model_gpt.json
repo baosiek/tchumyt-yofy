@@ -1,5 +1,5 @@
 {
-    "config_id": "GPT_0_0",
+    "config_id": "GPT_0_2",
     "name": "GPTModel",
     "type": "GPT_0_0",
     "version": "0.0",
@@ -7,12 +7,12 @@
     "cfg": {
         "vocabulary_size": 37759,
         "embedding_dimension": 768,
-        "context_length": 64,
+        "context_length": 128,
         "number_layers": 12,
         "number_heads": 12,
         "drop_rate": 0.5,
         "batch_size": 8,
-        "lr_rate": 0.0001,
+        "lr_rate": 0.00001,
         "weight_decay": 0.1,
         "num_epochs": 2,
         "eval_freq": 100,

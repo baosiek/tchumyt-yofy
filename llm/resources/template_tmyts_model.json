@@ -19,6 +19,7 @@
         "top_k": 3,
         "stride": 1,
         "drop_rate": 0.5,
-        "weight_decay": 0.1
+        "weight_decay": 0.1,
+        "num_layers": 3
     }
 }

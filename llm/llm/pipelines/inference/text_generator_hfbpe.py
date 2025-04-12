@@ -120,6 +120,7 @@ class TextGenerator():
         '''
 
         for _ in range(max_new_tokens):
+            # input_trimmed: torch.Tensor = self.pad_or_trim_sequence(input)
             input_trimmed: torch.Tensor = input[:, -self.context_length:]
             with torch.no_grad():
                 logits: torch.Tensor = self.model(input_trimmed)

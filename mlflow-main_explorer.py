@@ -1,6 +1,5 @@
 import mlflow
 import torch
-# import os
 import shutil
 
 from typing import Any, Dict, List, Tuple
@@ -45,7 +44,7 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = 0) -> \
     logger.info("Splitting dataset into train and validation subsets...")
     datasets: List[Subset] = torch.utils.data.random_split(
         dataset,
-        [0.9, 0.1],
+        [0.95, 0.05],
         generator=generator1,
     )
 
@@ -96,7 +95,7 @@ def main(
         return False
 
     # Start context
-    start_context: str = "Trump met for nearly"
+    start_context: str = "Trump met for nearly two"
     # two hours with President Joe Biden in the Oval Office
 
     # Gets hyperparameters from configuration file
@@ -104,13 +103,19 @@ def main(
     seq_length: int = cfg["context_length"]
     vocabulary_size: int = cfg["vocabulary_size"]
     dropout_rate: float = cfg["drop_rate"]
+    num_layers: int = cfg["num_layers"]
+    stride: int = cfg["model_stride"]
+    kernel_size: int = cfg["kernel_size"]
 
     # Initialize model
     model: TymysLLM = TymysLLM(
          hidden_dim=hidden_dim,
          seq_length=seq_length,
          vocabulary_size=vocabulary_size,
-         dropout_rate=dropout_rate
+         dropout_rate=dropout_rate,
+         num_layers=num_layers,
+         stride=stride,
+         kernel_size=kernel_size
     )
 
     decode_strategy: AbstractDecodeStrategy = get_decoder_factory(
@@ -140,12 +145,13 @@ def main(
     )
 
     description: str = '''
-    Three ConvBlocks. Stride 64 context_length 256. Emb_dim = 1536
+    First Model to compete with GPT-2
     '''
 
     with mlflow.start_run(
         run_name=run_name,
-        description=description
+        description=description,
+        log_system_metrics=True
     ) as run:
 
         # Logs training parameters
@@ -176,14 +182,19 @@ def main(
             registered_model_name=init_cfg["collection"],
         )
 
+        # TODO: There is a bug in track_tokens_seen as it is coming empty
         # Initialize metrics
-        metrics: Dict[str, Any] = {
-            "track_tokens_seen": track_tokens_seen[-1],
-        }
+        if len(track_tokens_seen) > 0:
+            metrics: Dict[str, Any] = {
+                "track_tokens_seen": track_tokens_seen[-1],
+            }
 
-        # Log metrics that were calculated during training
-        mlflow.log_metrics(metrics)
+            # Log metrics that were calculated during training
+            mlflow.log_metrics(metrics)
 
+    # Clear GPU cache
+    torch.cuda.empty_cache()
+    
     run_id: str = run.info.run_id
     return run_id
 
@@ -200,14 +211,14 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "Model TMYTS_0_1"
+    run_name = "Model TMYTS_0_2 - run: 02"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=350000, decode_strategy="greedy_decoding"
+        run_name, limit=560000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())
