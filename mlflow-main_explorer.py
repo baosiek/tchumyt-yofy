@@ -44,7 +44,7 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = 0) -> \
     logger.info("Splitting dataset into train and validation subsets...")
     datasets: List[Subset] = torch.utils.data.random_split(
         dataset,
-        [0.95, 0.05],
+        [0.90, 0.10],
         generator=generator1,
     )
 
@@ -145,7 +145,7 @@ def main(
     )
 
     description: str = '''
-    First Model to compete with GPT-2
+    Testing for num layers 6. Tmyts 3
     '''
 
     with mlflow.start_run(
@@ -211,14 +211,14 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "Model TMYTS_0_2 - run: 02"
+    run_name = "Model TMYTS_0_3 - run: 01"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
     run_id: str = main(
-        run_name, limit=560000, decode_strategy="greedy_decoding"
+        run_name, limit=600000, decode_strategy="greedy_decoding"
     )
 
     client = MlflowClient(mlflow.get_tracking_uri())

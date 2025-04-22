@@ -18,7 +18,24 @@ class Conv1DBlock(nn.Module):
             in_channels=embedding_dim,
             out_channels=embedding_dim,
             kernel_size=kernel_size,
-            stride=stride, padding='same'
+            stride=stride, padding='same',
+            groups=4
+        )
+
+        self.conv_1: nn.Conv1d = nn.Conv1d(
+            in_channels=embedding_dim,
+            out_channels=embedding_dim,
+            kernel_size=kernel_size * 2,
+            stride=stride, padding='same',
+            groups=4
+        )
+
+        self.conv_2: nn.Conv1d = nn.Conv1d(
+            in_channels=embedding_dim,
+            out_channels=embedding_dim,
+            kernel_size=kernel_size * 4,
+            stride=stride, padding='same',
+            groups=4
         )
 
         self.batch_norm_1: nn.BatchNorm1d = nn.BatchNorm1d(
@@ -38,7 +55,7 @@ class Conv1DBlock(nn.Module):
 
         shortcut: torch.Tensor = X
 
-        X = X.transpose(1, 2)
+        X = shortcut.transpose(1, 2)
         X = self.conv(X)
         X = self.batch_norm_1(X)
         X = self.relu(X)

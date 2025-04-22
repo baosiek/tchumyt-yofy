@@ -145,11 +145,19 @@ class TrainerV1:
         logger.info("Text generated before training ->")
         logger.info(f"[{filter_string(text_generated)}]")
 
+        # tracks processing time for evaluation
+        eval_start: datetime.datetime = datetime.datetime.now()
+
         # Evaluates the model before training and logs result just for fun
         train_loss, val_loss = self.evaluate(
             train_loader=train_loader,
             validation_loader=validation_loader,
             eval_iter=eval_num_batches,
+        )
+
+        # end of eval_freq
+        eval_elapsed: datetime.timedelta = (
+            datetime.datetime.now() - eval_start
         )
 
         mlflow.log_metric("train_loss", train_loss, step=0)
@@ -163,7 +171,7 @@ class TrainerV1:
             f"{total_global_steps:07d}): "
             f"Train loss {train_loss:12.8f}, "
             f"Val loss {val_loss:12.8f}, "
-            f"Time eval_freq {format_time_delta(datetime.timedelta(days=0, seconds=0))}"
+            f"Time eval_freq {format_time_delta(eval_elapsed)}"
         )
 
         # The training loop

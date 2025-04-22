@@ -1,10 +1,12 @@
-import torch
-import torch.nn as nn
+''' Doc String '''
 
 from collections import OrderedDict
 
+import torch
+from torch import nn
+
 from llm.llm.architecture.tmyts.min_gru import minGRU
-from llm.llm.architecture.tmyts.conv1d_block import Conv1DBlock
+from llm.llm.architecture.tmyts.conv1d_block_v1 import Conv1DBlock
 
 
 class TymysLLM(nn.Module):
@@ -49,18 +51,18 @@ class TymysLLM(nn.Module):
                 self.hidden_dim, self.hidden_dim * 2
             )),
             ('out_act_1', nn.GELU()),
-            ('out_linear_2', nn.Linear(
-                self.hidden_dim * 2, self.hidden_dim * 4
-            )),
-            ('out_act_2', nn.GELU()),
-            ('out_linear_3', nn.Linear(
-                self.hidden_dim * 4, self.hidden_dim * 4
-            )),
-            ('out_act_3', nn.GELU()),
-            ('out_linear_4', nn.Linear(
-                self.hidden_dim * 4, self.hidden_dim * 2
-            )),
-            ('out_act_4', nn.GELU()),
+            # ('out_linear_2', nn.Linear(
+            #     self.hidden_dim * 2, self.hidden_dim * 4
+            # )),
+            # ('out_act_2', nn.GELU()),
+            # ('out_linear_3', nn.Linear(
+            #     self.hidden_dim * 4, self.hidden_dim * 4
+            # )),
+            # ('out_act_3', nn.GELU()),
+            # ('out_linear_4', nn.Linear(
+            #     self.hidden_dim * 4, self.hidden_dim * 2
+            # )),
+            # ('out_act_4', nn.GELU()),
             ('out_linear_5', nn.Linear(
                 self.hidden_dim * 2, self.vocabulary_size
             )),
@@ -70,7 +72,7 @@ class TymysLLM(nn.Module):
             self,
             X: torch.Tensor
             ) -> torch.Tensor:
-        # validate input:
+        ''' validate input: '''
         if len(X.shape) != 2:
             raise RuntimeError("Input must have shape of "
                                "[batch_size, sequence_length]. "
