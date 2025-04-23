@@ -3,7 +3,7 @@ Layer (type:depth-idx)                   Param #
 =================================================================
 TymysLLM                                 --
 ├─Embedding: 1-1                         38,665,216
-├─minGRU: 1-2                            --
+├─minGRUBi: 1-2                          --
 │    └─Linear: 2-1                       2,097,152
 │    └─Identity: 2-2                     --
 ├─Dropout: 1-3                           --

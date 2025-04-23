@@ -145,7 +145,7 @@ def main(
     )
 
     description: str = '''
-    Testing for num layers 6. Tmyts 3
+    Bidirectional. Testing for num layers 8. Context length 256
     '''
 
     with mlflow.start_run(
@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "Model TMYTS_0_3 - run: 01"
+    run_name = "Model TMYTS_0_3 - run: 02"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.

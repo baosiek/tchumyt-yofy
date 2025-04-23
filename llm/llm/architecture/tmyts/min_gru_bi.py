@@ -15,12 +15,13 @@ Code from:
 '''
 
 
-class minGRU(Module):
+class minGRUBi(Module):
     def __init__(
             self,
             dim: int,
             expansion_factor: float = 1.0,
-            proj_out: float = None
+            proj_out: float = None,
+            bidirectional: bool = False
     ):
         super().__init__()
 
@@ -35,6 +36,8 @@ class minGRU(Module):
 
         self.to_out: Linear = Linear(dim_inner, dim, bias=False) \
             if proj_out else Identity()
+        
+        self.bidirectional: bool = bidirectional
 
     def forward(
             self,
@@ -42,6 +45,27 @@ class minGRU(Module):
             prev_hidden: torch.Tensor = None,
             return_next_prev_hidden: torch.Tensor = False
     ):
+
+        out_forward, next_prev_hidden_forward = self.forward_gru(x, prev_hidden, return_next_prev_hidden)
+
+        out_backward: torch.Tensor = torch.zeros(size=out_forward.size()).to(device=x.device)
+        next_prev_hidden_backward: torch.Tensor = torch.zeros(size=next_prev_hidden_forward.size()).to(device=x.device)
+
+        if self.bidirectional:
+            flipped_x = torch.flip(x, dims=[1])
+            out_backward, next_prev_hidden_backward = self.forward_gru(flipped_x, prev_hidden, return_next_prev_hidden)
+
+        if not return_next_prev_hidden:
+            return out_forward + out_backward        
+
+        return out_forward + out_backward, next_prev_hidden_forward + next_prev_hidden_backward
+    
+    def forward_gru(self,
+            x: torch.Tensor,
+            prev_hidden: torch.Tensor = None,
+            return_next_prev_hidden: torch.Tensor = False):
+        ''' DOCSTRING '''
+        
         seq_len: int = x.shape[1]
         hidden, gate = self.to_hidden_and_gate(x).chunk(2, dim=-1)
 
@@ -50,9 +74,6 @@ class minGRU(Module):
 
             hidden: torch.Tensor = g(hidden)
             gate = gate.sigmoid()
-            # print(f"prev_hidden shape: {prev_hidden.shape}")
-            # print(f"hidden shape: {hidden.shape}")
-            # print(f"gate shape: {gate.shape}")
             out = torch.lerp(prev_hidden, hidden, gate) \
                 if exists(prev_hidden) else (hidden * gate)
         else:
@@ -71,13 +92,11 @@ class minGRU(Module):
             out = out[:, -seq_len:]
 
         next_prev_hidden = out[:, -1:]
-
         out = self.to_out(out)
 
-        if not return_next_prev_hidden:
-            return out
-
         return out, next_prev_hidden
+        
+
 
 
 def exists(v):
