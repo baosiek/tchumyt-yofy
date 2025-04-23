@@ -1,3 +1,4 @@
+''' DOCSTRING '''
 import torch
 import torch.nn.functional as F
 from torch.nn import Linear, Identity, Module
@@ -49,16 +50,15 @@ class minGRU(Module):
 
             hidden: torch.Tensor = g(hidden)
             gate = gate.sigmoid()
-            print(f"prev_hidden shape: {prev_hidden.shape}")
-            print(f"hidden shape: {hidden.shape}")
-            print(f"gate shape: {gate.shape}")
+            # print(f"prev_hidden shape: {prev_hidden.shape}")
+            # print(f"hidden shape: {hidden.shape}")
+            # print(f"gate shape: {gate.shape}")
             out = torch.lerp(prev_hidden, hidden, gate) \
                 if exists(prev_hidden) else (hidden * gate)
         else:
             # parallel
 
             log_coefficients = -F.softplus(gate)
-
             log_z = -F.softplus(-gate)
             log_tilde_h = log_g(hidden)
             log_values = log_z + log_tilde_h
@@ -81,10 +81,12 @@ class minGRU(Module):
 
 
 def exists(v):
+    ''' DOCSTRING '''
     return v is not None
 
 
 def default(v, d):
+    ''' DOCSTRING '''
     return v if exists(v) else d
 
 
@@ -92,6 +94,7 @@ def heinsen_associative_scan_log(
         log_coefficients: torch.Tensor,
         log_values: torch.Tensor
 ) -> torch.Tensor:
+    ''' DOCSTRING '''
     a_star: torch.Tensor = log_coefficients.cumsum(dim=1)
     log_h0_plus_b_star: torch.Tensor = \
         (log_values - a_star).logcumsumexp(dim=1)
@@ -102,8 +105,10 @@ def heinsen_associative_scan_log(
 
 
 def g(x):
+    ''' DOCSTRING '''
     return torch.where(x >= 0, x + 0.5, x.sigmoid())
 
 
 def log_g(x):
+    ''' DOCSTRING '''
     return torch.where(x >= 0, (F.relu(x) + 0.5).log(), -F.softplus(-x))

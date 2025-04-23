@@ -5,7 +5,8 @@ from collections import OrderedDict
 import torch
 from torch import nn
 
-from llm.llm.architecture.tmyts.min_gru import minGRU
+# from llm.llm.architecture.tmyts.min_gru import minGRU
+from llm.llm.architecture.tmyts.min_gru_bi import minGRUBi
 from llm.llm.architecture.tmyts.conv1d_block_v1 import Conv1DBlock
 
 
@@ -33,7 +34,8 @@ class TymysLLM(nn.Module):
             embedding_dim=self.hidden_dim
         )
 
-        self.minGRU_1: minGRU = minGRU(dim=self.hidden_dim)
+        # self.minGRU_1: minGRU = minGRU(dim=self.hidden_dim)
+        self.minGRU_1: minGRUBi = minGRUBi(dim=self.hidden_dim, bidirectional=True)
         self.drop_gru_1: nn.Dropout = nn.Dropout(self.dropout_rate)
         self.norm_gru_1: nn.LayerNorm = nn.LayerNorm(self.hidden_dim)
 
@@ -83,7 +85,8 @@ class TymysLLM(nn.Module):
 
         shortcut: torch.Tensor = X
 
-        output, _ = self.minGRU_1(X, return_next_prev_hidden=True)
+        # output, _ = self.minGRU_1(X, return_next_prev_hidden=True)
+        output = self.minGRU_1(X, return_next_prev_hidden=False)
         X = output
         X = self.drop_gru_1(X)
         X = self.norm_gru_1(X)
