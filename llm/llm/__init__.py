@@ -182,20 +182,8 @@ def loads_configuration(config_id: str) -> Dict[str, Any]:
 # Initializes the logger
 logger: logging.Logger = initialize_logger("llm/configs/logger")
 
-# # Loads trainer configuration
-# trainer_cfg: Dict[str, Any] = loads_trainer_configuration(
-#     "llm/configs/trainer"
-# )
-
-# # Loads model configuration
-# model_cfg: Dict[str, Any] = loads_model_configuration(
-#     "llm/configs/model"
-# )
-
 init_cfg: Dict[str, Any] = loads_init_configuration()
 logger.info(f"Initialization configuration is: {init_cfg}")
 
 # Loads configuration
 cfg: Dict[str, Any] = loads_configuration(config_id=init_cfg["collection"])
-
-# TODO: Needs to test the above cfg loader

@@ -1,0 +1,29 @@
+{
+    "config_id": "GPT_0_2",
+    "name": "GPTModel",
+    "type": "GPT_0_0",
+    "version": "0.0",
+    "description": "GPT Model for performance comparison",
+    "cfg": {
+        "vocabulary_size": 37759,
+        "embedding_dimension": 768,
+        "context_length": 128,
+        "number_layers": 12,
+        "number_heads": 12,
+        "drop_rate": 0.5,
+        "batch_size": 8,
+        "lr_rate": 0.00001,
+        "weight_decay": 0.1,
+        "num_epochs": 2,
+        "eval_freq": 100,
+        "eval_iter": 100,
+        "temperature": 0.1,
+        "patience": 3,
+        "delta": 1.0,
+        "tiktoken_encoding": "gpt2",
+        "top_k": 3,
+        "stride": 1,
+        "attention_mask": false,
+        "bias": false
+    }
+}

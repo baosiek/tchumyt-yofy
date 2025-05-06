@@ -1,6 +1,5 @@
 import mlflow
 import torch
-import os
 import shutil
 
 from typing import Any, Dict, List, Tuple
@@ -11,19 +10,21 @@ from mlflow import MlflowClient
 
 
 from llm.llm import logger, cfg, init_cfg
-from llm.llm.architecture.abstract_model import AbstractModel
-from llm.llm.architecture.rnn.rnn_model import RNNModelV1
+from llm.llm.architecture.tmyts.tmyts_llm_explorer import TymysLLM
 from llm.llm.pipelines.train.trainer_v1 import TrainerV1
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
-from llm.llm.pipelines.inference.text_generator import TextGenerator
+from llm.llm.pipelines.inference.text_generator_hfbpe import TextGenerator
+from llm.llm.tokenizers.bpe_tokenizer import HFBPETokenizer
 from llm.llm.pipelines.data_ingestion.data_loader import \
     create_crawl_dataset_loader
-from llm.llm.components.decoding_strategies import TopKScaling, \
-      AbstractDecodeStrategy
+from llm.llm.components.decoding_strategies import AbstractDecodeStrategy, \
+    get_decoder_factory
+
+# mlflow.enable_system_metrics_logging()
 
 
-def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
+def get_loaders(query: Dict[str, Any] = None, limit: int = 0) -> \
         Tuple[DataLoader, DataLoader]:
     # 1. Load datasets
     # 1.1 Initializes MongoDB client
@@ -34,21 +35,27 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
     # 1.2 Generator to enabling split dataset into train and validation subsets
     generator1: torch.Generator = torch.Generator().manual_seed(918)
 
+    # 1.3 Loads dataset
+    dataset: CrawlDataset = CrawlDataset(
+        client=client, limit=limit, query=query
+    )
+
     # 1.3 Creates a list with both subsets, 90% training, 10% evaluation
+    logger.info("Splitting dataset into train and validation subsets...")
     datasets: List[Subset] = torch.utils.data.random_split(
-        CrawlDataset(client=client, limit=limit, query=query),
-        [0.9, 0.1],
+        dataset,
+        [0.90, 0.10],
         generator=generator1,
     )
 
     # 1.4 Assigns train and validation datasets accordingly
     train_dataset: Subset = datasets[0]
     validation_dataset: Subset = datasets[1]
-
-    # logger.info(f"Configuration cfg type: {cfg.keys()}")
-    # logger.info(f"vocabulary_size: {cfg['vocabulary_size']}")
+    logger.info(f"Train dataset length: {len(train_dataset)}")
+    logger.info(f"Validation dataset length: {len(validation_dataset)}")
 
     # 1.5 Creates train and validation dataloaders
+    logger.info("Creating train and validation dataloaders...")
     train_loader: DataLoader = create_crawl_dataset_loader(
         crawl_dataset=train_dataset,
         batch_size=cfg["batch_size"],
@@ -61,21 +68,25 @@ def get_loaders(query: Dict[str, Any] = None, limit: int = None) -> \
         shuffle=False
     )
 
-    # 1.5 Log their sizes
+    # 1.6 Log their sizes
     logger.info(f"Train loader length: {len(list(train_loader))}")
     logger.info(f"Validation loader length: {len(list(validation_loader))}")
 
     return (train_loader, validation_loader)
 
 
-def main(run_name: str) -> bool:
+def main(
+        run_name: str,
+        limit: int = 0,
+        decode_strategy: str = "greedy_decoding"
+) -> str:
     # Set the device on which the model will be trained
     device: str = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # TODO: Add a query to filter the dataset.
-    # TODO:Must adjust Dataset schema at MongoDB
+    # TODO: Must adjust Dataset schema at MongoDB
     # Get loaders
-    train_loader, validation_loader = get_loaders(limit=1000)
+    train_loader, validation_loader = get_loaders(limit=limit)
 
     if len(list(train_loader)) == 0 or len(list(validation_loader)) == 0:
         logger.error(
@@ -84,23 +95,43 @@ def main(run_name: str) -> bool:
         return False
 
     # Start context
-    start_context: str = "Trump is the president of the"
+    start_context: str = "Trump met for nearly two"
+    # two hours with President Joe Biden in the Oval Office
+
+    # Gets hyperparameters from configuration file
+    hidden_dim: int = cfg["embedding_dim"]
+    seq_length: int = cfg["context_length"]
+    vocabulary_size: int = cfg["vocabulary_size"]
+    dropout_rate: float = cfg["drop_rate"]
+    num_layers: int = cfg["num_layers"]
+    stride: int = cfg["model_stride"]
+    kernel_size: int = cfg["kernel_size"]
 
     # Initialize model
-    model: AbstractModel = RNNModelV1(
-        cfg=cfg, device=device
+    model: TymysLLM = TymysLLM(
+         hidden_dim=hidden_dim,
+         seq_length=seq_length,
+         vocabulary_size=vocabulary_size,
+         dropout_rate=dropout_rate,
+         num_layers=num_layers,
+         stride=stride,
+         kernel_size=kernel_size
     )
 
-    # Sets the strategy for decoding
-    decode_strategy: AbstractDecodeStrategy = TopKScaling(
-        topk_k=cfg["top_k"], temperature=cfg["temperature"]
+    decode_strategy: AbstractDecodeStrategy = get_decoder_factory(
+        "greedy_decoding"
+    )
+
+    # Initializes Tokenizer
+    tokenizer: HFBPETokenizer = HFBPETokenizer(
+        tokenizer_path="llm/resources/bpe_tokenizer.json"
     )
 
     # Initializes text generator based with model initialized
     text_generator: TextGenerator = TextGenerator(
         model=model,
         context_length=cfg["context_length"],
-        encoding=cfg["tiktoken_encoding"],
+        tokenizer=tokenizer,
         decode_strategy=decode_strategy,
     )
 
@@ -109,14 +140,19 @@ def main(run_name: str) -> bool:
         model=model,
         text_generator=text_generator,
         trainer_cfg=cfg,
-        device=device
+        device=device,
+        to_early_stop=False
     )
+
+    description: str = '''
+    Bidirectional. Testing for num layers 8. Context length 256
+    '''
 
     with mlflow.start_run(
         run_name=run_name,
-        description="Testing LSTM on RNN"
-    ):
-        mlflow.enable_system_metrics_logging()
+        description=description,
+        log_system_metrics=True
+    ) as run:
 
         # Logs training parameters
         mlflow.log_params(cfg)
@@ -127,31 +163,15 @@ def main(run_name: str) -> bool:
 
         mlflow.log_artifact("llm/reports/model_summary.txt")
 
-        train_losses, validation_losses, track_tokens_seen, _ = trainer.train(
+        # Starts the training
+        _, _, track_tokens_seen, _ = trainer.train(
             train_loader=train_loader,
             validation_loader=validation_loader,
             start_context=start_context,
         )
 
-        # Initialize metrics
-        metrics: Dict[str, Any] = {
-            "train_loss": train_losses[-1],
-            "validation_loss": validation_losses[-1],
-            "track_tokens_seen": track_tokens_seen[-1],
-        }
-
-        # Log metrics that were calculated during training
-        mlflow.log_metrics(metrics)
-
-        '''
-        While saving the model to MLFlow, the function
-        mlflow.pytorch.log_model() is corrupting the logger
-        file. It will take time to find why and correct it.
-
-        The following code backups the log file as it is now.
-        '''
         # Copy the contents of the source file to the destination file
-        shutil.copyfile("llm/logs/project.log", "llm/logs/project.bak.log")
+        shutil.copyfile("llm/logs/training.log", "llm/logs/training_1.log")
 
         # Define an artifact path that the model will be saved to.
         artifact_path_model = f"tchumyt/model/{init_cfg["collection"]}"
@@ -162,28 +182,21 @@ def main(run_name: str) -> bool:
             registered_model_name=init_cfg["collection"],
         )
 
-        # Recover original log file
-        shutil.copyfile("llm/logs/project.bak.log", "llm/logs/project.log")
+        # TODO: There is a bug in track_tokens_seen as it is coming empty
+        # Initialize metrics
+        if len(track_tokens_seen) > 0:
+            metrics: Dict[str, Any] = {
+                "track_tokens_seen": track_tokens_seen[-1],
+            }
 
-        # Check if the file exists before attempting to delete it
-        if os.path.exists("llm/logs/project.bak.log"):
-            os.remove("llm/logs/project.bak.log")
+            # Log metrics that were calculated during training
+            mlflow.log_metrics(metrics)
 
-        # Saves the training log
-        artifact_path_log = "logs"
-        mlflow.log_artifact(
-            "llm/logs/project.log",
-            artifact_path_log
-        )
-
-        # Saves the training performance
-        artifact_path_objects = "objects"
-        mlflow.log_artifact(
-            "llm/pickle_objects/train_tracking_objects.pkl",
-            artifact_path_objects
-        )
-
-    return True
+    # Clear GPU cache
+    torch.cuda.empty_cache()
+    
+    run_id: str = run.info.run_id
+    return run_id
 
 
 if __name__ == "__main__":
@@ -192,19 +205,21 @@ if __name__ == "__main__":
 
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
-    _experiment = mlflow.set_experiment("TMYTS Model")
+    _experiment = mlflow.set_experiment(
+        "TMYTS Explorer"
+    )
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "training 001"
+    run_name = "Model TMYTS_0_3 - run: 02"
 
     # FIXME: artifact_path not recognized \
     # Define an artifact path that the model will be saved to.
     artifact_path = f"mlflow-artifacts:/tchumyt/model/{init_cfg["collection"]}"
 
-    if not main(run_name):
-        logger.error("Training failed. Exiting.")
-        exit(1)
+    run_id: str = main(
+        run_name, limit=600000, decode_strategy="greedy_decoding"
+    )
 
     client = MlflowClient(mlflow.get_tracking_uri())
     model_info = client.get_latest_versions(
@@ -218,6 +233,17 @@ if __name__ == "__main__":
         version=model_info.version,
         key="nlp",
         value="text_generation",
+    )
+
+    # # Saves the training log
+    artifact_path_log = "logs"
+    client.log_artifact(
+        run_id,
+        "llm/logs/training_1.log",
+    )
+    client.log_artifact(
+        run_id,
+        "llm/pickle_objects/train_tracking_objects.pkl",
     )
 
     logger.info("The End")

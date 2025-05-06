@@ -11,25 +11,28 @@ class CrawlDataset(Dataset):
             self,
             client: TchumytMongoClient,
             query: Dict[str, Any] = None,
-            limit: int = None
+            limit: int = 0
     ):
         super().__init__()
         self.client: TchumytMongoClient = client
 
-        if query is None:
-            logger.info("Querying DB...")
-        else:
-            logger.info(f"Querying DB with query: {query}")
+        logger.info("Building dataset...")
 
-        self.records: List[str] = list(client.query(query))
+        if query is None and limit == 0:
+            logger.info(
+                "No query and limit was defined, fetching all records..."
+            )
+        else:
+            if limit == 0:
+                logger.info(f"Retrieving all records with query: {query}")
+            else:
+                logger.info(f"Retrieving {limit} records with query: {query}")
+
+        self.records: List[str] = list(client.query(query, limit=limit))
+
+        client.close()
+
         logger.info(f"Records retrieved: {len(self.records)}")
-
-        if limit is None:
-            self.records: List[str] = list(client.query(query))
-        else:
-            self.records: List[str] = list(client.query_with_limit(
-                query, limit=limit)
-                )
 
     def __len__(self) -> int:
         return len(self.records)

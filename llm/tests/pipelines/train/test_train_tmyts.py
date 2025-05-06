@@ -6,8 +6,7 @@ from typing import Tuple, Dict, List, Any
 from torch.utils.data import DataLoader
 from torch.utils.data.dataset import Subset
 
-from llm.llm.architecture.abstract_model import AbstractModel
-from llm.llm.architecture.rnn.rnn_model import RNNModelV1
+from llm.llm.architecture.tmyts.tmyts_llm import TymysLLM
 from llm.llm.utils.tchumyt_mongo_client import TchumytMongoClient
 from llm.llm.pipelines.data_ingestion.crawl_dataset import CrawlDataset
 from llm.llm.pipelines.data_ingestion.data_loader import \
@@ -29,7 +28,7 @@ def start_context() -> str:
 def mock_cfg() -> Dict[str, Any]:
 
     mock_cfg: Dict[str, Any] = {
-        "name": "RNNModelV1",
+        "name": "RNNModelV2",
         "vocabulary_size": 50257,
         "context_length": 64,
         "embedding_dim": 1024,
@@ -37,7 +36,7 @@ def mock_cfg() -> Dict[str, Any]:
         "batch_size": 8,
         "lr_rate": 0.0004,
         "weight_decay": 0.1,
-        "num_epochs": 2,
+        "num_epochs": 10,
         "eval_freq": 100,
         "temperature": 0.1,
         "eval_iter": 100,
@@ -51,10 +50,13 @@ def mock_cfg() -> Dict[str, Any]:
 
 
 @pytest.fixture()
-def model(mock_cfg: Dict[str, Any]) -> AbstractModel:
-    model: AbstractModel = RNNModelV1(
-        cfg=mock_cfg,
-        device="cuda" if torch.cuda.is_available() else "cpu"
+def model(mock_cfg: Dict[str, Any]) -> TymysLLM:
+    model: TymysLLM = TymysLLM(
+        hidden_dim=1024,
+        seq_length=8,
+        vocabulary_size=50257,
+        dropout_rate=0.5,
+        num_heads=4
     )
     return model.to(device="cuda" if torch.cuda.is_available() else "cpu")
 
@@ -128,7 +130,7 @@ def loaders(mock_data,
 
 def test_trainer_initialization(
         start_context: str,
-        model: AbstractModel,
+        model: TymysLLM,
         decode_strategy
         ) -> None:
 
@@ -147,7 +149,7 @@ def test_trainer_initialization(
         device=device
     )
 
-    assert trainer.model._get_name() == "RNNModelV1"
+    assert trainer.model._get_name() == "TymysLLM"
 
     logger.info(
         "Trainer was initialized for model: "
@@ -158,7 +160,7 @@ def test_trainer_initialization(
 def test_trainer_train_method_no_early_stop(
           start_context: str,
           loaders: Tuple[DataLoader, DataLoader],
-          model: AbstractModel,
+          model: TymysLLM,
           decode_strategy: AbstractDecodeStrategy,
           mock_cfg: Dict[str, Any],
         ) -> None:

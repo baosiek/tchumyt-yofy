@@ -28,6 +28,16 @@
             "level": "DEBUG",
             "mode": "w",
             "encoding": "utf-8"
+        },
+        "rotating_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "llm/logs/project.log",
+            "maxBytes": 5120,
+            "backupCount": 3,
+            "encoding": "utf-8",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "mode": "a"
         }
     },
     "loggers": {

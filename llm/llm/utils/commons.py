@@ -2,6 +2,7 @@ import yaml
 import os
 import stat
 import json
+import re
 
 from typing import Dict, Any
 from llm.llm import logger
@@ -19,7 +20,7 @@ def read_yaml(path_to_yaml: str) -> Dict[str, Any]:
         e: empty file
 
     Returns:
-        Dict[str, Any]: a python dictionary with yaml content 
+        Dict[str, Any]: a python dictionary with yaml content
     """
 
     try:
@@ -63,3 +64,7 @@ def read_json(path_to_json: str) -> Dict[str, Any]:
     except FileNotFoundError as error:
         logger.error(f"File {path_to_json} not found")
         raise error
+
+
+def filter_string(text: str) -> str:
+    return re.sub(r'[^\x20-\x7E\u00A0-\uFFFF]', '', text)
