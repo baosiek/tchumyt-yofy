@@ -177,3 +177,6 @@ mlartifacts/
 # logs directory
 logs/
 
+# poetry lock file
+*.lock
+
