@@ -155,15 +155,15 @@ if __name__ == "__main__":
 
     # Sets the current active experiment to the "Politics GPTModel"
     # experiment and returns the Experiment metadata
-    _experiment = mlflow.set_experiment("Politics GPTModel")
+    _experiment = mlflow.set_experiment("TMYTS GPTModel")
 
     # Define a run name for this iteration of training.
     # If this is not set, a unique name will be auto-generated for your run.
-    run_name = "politics_gptmodel_test"
+    run_name = "politics_tmyts_model_test_01"
 
     # Define an artifact path that the model will be saved to.
     artifact_path = \
-        "mlflow-artifacts:/585006454050763634/model/politics_gptmodel"
+        "mlflow-artifacts:/model/gptmodel"
 
     main()
 

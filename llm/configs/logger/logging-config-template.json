@@ -1,0 +1,55 @@
+{
+    "version": 1,
+    "disable_existing_loggers": "False",
+    "formatters": {
+        "standard": {
+            "format": "%(asctime)s - %(module)s - %(levelname)s - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+        "detailed": {
+            "format": "%(asctime)s - %(name)s - %(levelname)s - %(module)s - line: %(lineno)d - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+        "simple": {
+            "format": "%(levelname)s - %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
+            "level": "DEBUG"
+        },
+        "file_handler": {
+            "class": "logging.FileHandler",
+            "filename": "llm/logs/training.log",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "mode": "w",
+            "encoding": "utf-8"
+        },
+        "rotating_handler": {
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": "llm/logs/project.log",
+            "maxBytes": 5120,
+            "backupCount": 3,
+            "encoding": "utf-8",
+            "formatter": "standard",
+            "level": "DEBUG",
+            "mode": "a"
+        }
+    },
+    "loggers": {
+        "gpt_model": {
+            "handlers": ["console", "file_handler"],
+            "level": "INFO",
+            "propagate": "True"
+        },
+        "rnn_model": {
+            "handlers": ["console", "file_handler"],
+            "level": "INFO",
+            "propagate": false
+        }
+    }
+}

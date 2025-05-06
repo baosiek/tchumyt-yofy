@@ -1,0 +1,25 @@
+{
+    "config_id": "TMYTS_0_0",
+    "name": "TMYTSModel",
+    "type": "FFW",
+    "version": "0.0",
+    "description": "TMYTS model with adjusted context and embedding_dim",
+    "cfg": {
+        "vocabulary_size": 37759,
+        "context_length": 64,
+        "embedding_dim": 1024,
+        "batch_size": 8,
+        "lr_rate": 0.00001,
+        "num_epochs": 2,
+        "eval_freq": 100,
+        "eval_iter": 100,
+        "temperature": 0.1,
+        "patience": 3,
+        "delta": 1.0,
+        "top_k": 3,
+        "stride": 1,
+        "drop_rate": 0.5,
+        "weight_decay": 0.1,
+        "num_layers": 3
+    }
+}

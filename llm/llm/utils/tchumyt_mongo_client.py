@@ -11,6 +11,9 @@ class TchumytMongoClient():
     def __init__(self, config: str):
         configuration: Dict[str, Any] = read_yaml(config)
 
+        self.dataset_name: str = configuration["dataset"]
+        self.collection_name: str = configuration["collection"]
+
         # Gets username
         username: str = os.getenv("MONGO_INITDB_ROOT_USERNAME")
         password: str = os.getenv("MONGO_INITDB_ROOT_PASSWORD")
@@ -25,18 +28,15 @@ class TchumytMongoClient():
                     f"{configuration['mongo_port']}")
 
         self.client: pymongo.MongoClient = pymongo.MongoClient(uri)
+        self.database = self.client[self.dataset_name]
+        self.collection = self.database[self.collection_name]
 
-        self.database = self.client[configuration["dataset"]]
-        self.collection = self.database[configuration['collection']]
+    def query(self, query: str = None, limit: int = 0) -> Cursor:
 
-    def query(self, query: str = None) -> Cursor:
-        if query is None:
-            return self.collection.find()
-        else:
-            return self.collection.find(query)
-
-    def query_with_limit(self, query: str = None, limit: int = 1000) -> Cursor:
         if query is None:
             return self.collection.find().limit(limit=limit)
         else:
-            return self.collection.find(query).limit(limit=limit)
+            self.collection.find(query).limit(limit=limit)
+
+    def close(self):
+        self.client.close()
