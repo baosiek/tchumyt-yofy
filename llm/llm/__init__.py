@@ -159,7 +159,7 @@ def loads_configuration(config_id: str) -> Dict[str, Any]:
     try:
         uri = "mongodb://baosiek:123456@www.mongo.ca:30018"
         client = MongoClient(uri)
-        database = client["configs"]
+        database = client["tmyts_configs"]
         collection = database["models"]
 
         results = collection.find_one(
