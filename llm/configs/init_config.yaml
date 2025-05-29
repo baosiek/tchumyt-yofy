@@ -1,5 +1,5 @@
-mongo_host: "www.mongo.ca"
-mongo_port: "30018"
+mongo_host: "mongodb-1.mongodb-hs.mongo.svc.cluster.local"
+mongo_port: "27017"
 dataset: "models_data"
 collection: "TMYTS_0_3"
 data_config_id: "TMYTS_PIPELINE"
