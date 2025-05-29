@@ -1,0 +1,12 @@
+{
+    "config_id": "tkz_politics_trump",
+    "version": "0.0.1",
+    "type": "tokenizer",
+    "source": {
+        "database": "nlp_data",
+        "collection": "trump_data"
+    },
+    "cfg": {
+        "num_words": 10000
+    }
+}
