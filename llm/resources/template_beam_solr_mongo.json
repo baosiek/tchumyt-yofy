@@ -1,6 +1,8 @@
 {
-    "config_id": "SOLR_MONGO_PIPELINE",
-    "description": "This is the configuration tio run solr to mongo data pipeline on beam",
+    "config_id": "beam_solr2mongo",
+    "version": "0.0.1",
+    "type": "beam_pipeline",
+    "description": "This is the configuration to run solr to mongo data pipeline on beam",
     "cfg": {
         "solr_data_source": {
             "database": "newsDB",
