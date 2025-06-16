@@ -35,7 +35,9 @@ class TymysLLM(nn.Module):
         )
 
         # self.minGRU_1: minGRU = minGRU(dim=self.hidden_dim)
-        self.minGRU_1: minGRUBi = minGRUBi(dim=self.hidden_dim, bidirectional=True)
+        self.minGRU_1: minGRUBi = minGRUBi(
+            dim=self.hidden_dim, bidirectional=True
+        )
         self.drop_gru_1: nn.Dropout = nn.Dropout(self.dropout_rate)
         self.norm_gru_1: nn.LayerNorm = nn.LayerNorm(self.hidden_dim)
 
