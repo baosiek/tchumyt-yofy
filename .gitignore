@@ -180,3 +180,8 @@ logs/
 # poetry lock file
 *.lock
 
+
+# local secrets
+variables.env
+*.env
+!*.env.example
